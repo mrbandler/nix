@@ -3,7 +3,7 @@
     homeManager =
       { lib, pkgs, ... }:
       {
-        programs.obsidian.enable = lib.mkDefault pkgs.stdenv.isLinux;
+        programs.obsidian.enable = lib.mkDefault pkgs.stdenv.hostPlatform.isLinux;
       };
 
     provides.to-hosts.darwin.homebrew.casks = [ "obsidian" ];
