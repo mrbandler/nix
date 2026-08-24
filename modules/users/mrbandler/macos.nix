@@ -84,7 +84,7 @@
       pkgs,
       ...
     }:
-    lib.mkIf pkgs.stdenv.isDarwin {
+    lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
 
       # Layout switching on ctrl-space (fn-tap became the launcher; the
       # launcher chord moved to fn+space, freeing ctrl-space back up).

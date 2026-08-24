@@ -5,7 +5,7 @@
       {
         home.packages =
           with pkgs;
-          [ telegram-desktop ] ++ lib.optionals stdenv.isLinux [ whatsapp-electron ];
+          [ telegram-desktop ] ++ lib.optionals stdenv.hostPlatform.isLinux [ whatsapp-electron ];
       };
 
     provides.to-hosts.darwin.homebrew.casks = [

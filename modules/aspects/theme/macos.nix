@@ -16,7 +16,7 @@
         pkgs,
         ...
       }:
-      lib.mkIf (pkgs.stdenv.isDarwin && config.stylix.image != null) {
+      lib.mkIf (pkgs.stdenv.hostPlatform.isDarwin && config.stylix.image != null) {
         home.activation.setWallpaper = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           /usr/bin/osascript -e 'tell application "System Events" to tell every desktop to set picture to "${config.stylix.image}"' \
             || echo "setWallpaper: osascript failed — grant Automation (System Events) to the app running the switch" >&2

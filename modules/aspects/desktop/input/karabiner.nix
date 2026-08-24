@@ -9,7 +9,7 @@
         pkgs,
         ...
       }:
-      lib.mkIf pkgs.stdenv.isDarwin {
+      lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
         xdg.configFile."karabiner/karabiner.json".text = builtins.toJSON {
           profiles = [
             {

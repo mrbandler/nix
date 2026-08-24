@@ -15,7 +15,7 @@
     let
       profile = config.home.username;
       sessionsDir =
-        if pkgs.stdenv.isDarwin then
+        if pkgs.stdenv.hostPlatform.isDarwin then
           "${config.home.homeDirectory}/Library/Application Support/Zen/Profiles/${profile}"
         else
           "${config.xdg.configHome}/zen/${profile}";
@@ -26,13 +26,13 @@
       stylix.targets.zen-browser.profileNames = [ profile ];
 
       home.activation = {
-        zenDefaultBrowser = lib.mkIf pkgs.stdenv.isDarwin (
+        zenDefaultBrowser = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
           lib.hm.dag.entryAfter [ "writeBoundary" ] ''
             ${pkgs.defaultbrowser}/bin/defaultbrowser zen || true
           ''
         );
 
-        zenBindInstall = lib.mkIf pkgs.stdenv.isDarwin (
+        zenBindInstall = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
           lib.hm.dag.entryAfter [ "zen-browser-${profile}" ] ''
             INSTALLS_INI="${config.home.homeDirectory}/Library/Application Support/Zen/installs.ini"
             if [ -f "$INSTALLS_INI" ]; then

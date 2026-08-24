@@ -55,11 +55,11 @@
       programs.vicinae = {
         enable = true;
 
-        systemd = lib.mkIf pkgs.stdenv.isLinux {
+        systemd = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           enable = true;
           target = "graphical-session.target";
         };
-        launchd = lib.mkIf pkgs.stdenv.isDarwin {
+        launchd = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
           enable = true;
           autoStart = true;
         };
@@ -95,7 +95,7 @@
 
         extensions =
           # Linux-only concepts stay with zeus
-          lib.optionals pkgs.stdenv.isLinux (
+          lib.optionals pkgs.stdenv.hostPlatform.isLinux (
             with exts;
             [
               power-profile
