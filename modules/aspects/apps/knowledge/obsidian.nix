@@ -1,11 +1,9 @@
 {
   den.aspects.apps = {
     homeManager =
-      { lib, pkgs, ... }:
+      { lib, ... }:
       {
-        programs.obsidian.enable = lib.mkDefault pkgs.stdenv.isLinux;
+        programs.obsidian.enable = lib.mkDefault true;
       };
-
-    provides.to-hosts.darwin.homebrew.casks = [ "obsidian" ];
   };
 }
