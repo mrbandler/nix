@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CACHIX_CACHE: ${{ github.repository_owner }}
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: DeterminateSystems/nix-installer-action@main
+      - run: nix build --print-build-logs .#checks.x86_64-linux.treefmt
+
+  hosts:
+    name: Discover hosts
+    needs: lint
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.hosts.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: DeterminateSystems/nix-installer-action@main
+      - id: hosts
+        run: |
+          hosts() {
+            nix eval --json ".#$1" --apply 'hosts: builtins.mapAttrs (_: host: host.config.nixpkgs.hostPlatform.system) hosts' 2>/dev/null || echo '{}'
+          }
+          matrix=$({ hosts darwinConfigurations; hosts nixosConfigurations; } | jq -c '
+            { "aarch64-darwin": "macos-latest", "x86_64-linux": "ubuntu-latest", "aarch64-linux": "ubuntu-24.04-arm" } as $runners
+            | to_entries | map({ host: .key, system: .value, runner: $runners[.value] })' | jq -cs 'add')
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "$matrix"
+
+  build:
+    name: Build ${{ matrix.host }} (${{ matrix.system }})
+    needs: hosts
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.hosts.outputs.matrix) }}
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      CLOSURE: .#checks.${{ matrix.system }}.${{ matrix.host }}
+    steps:
+      - uses: wimpysworld/nothing-but-nix@main
+        if: runner.os == 'Linux'
+      - uses: actions/checkout@v5
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: accept-flake-config = true
+
+      - name: Flake checks
+        run: nix flake check --print-build-logs
+
+      - name: Build
+        run: nix build --print-build-logs "$CLOSURE" -o result-new
+
+      - name: Push to cachix
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+        run: nix run nixpkgs#cachix -- push "$CACHIX_CACHE" "$(readlink result-new)"
+
+      - name: Build the base commit
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch --depth 1 origin "$BASE"
+          git show "$BASE:flake.lock" > old.lock
+          nix build --print-build-logs "github:${{ github.repository }}/$BASE#checks.${{ matrix.system }}.${{ matrix.host }}" -o result-old
+
+      - name: Update report
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          nix run .#update-report -- --host "${{ matrix.host }}" \
+            --old-lock old.lock --new-lock flake.lock \
+            --old-closure result-old --new-closure result-new > report.md
+
+      - uses: marocchino/sticky-pull-request-comment@v3
+        if: github.event_name == 'pull_request'
+        with:
+          header: update-report-${{ matrix.host }}
+          path: report.md
+
+  ci:
+    name: CI
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: test "${{ needs.build.result }}" = success

@@ -1,0 +1,30 @@
+name: Update flake inputs
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/update-flake-lock@v28
+        id: update
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          branch: update/flake-inputs
+          commit-msg: "chore(deps): update flake inputs"
+          pr-title: "chore(deps): update flake inputs"
+          pr-body: |
+            ```
+            {{ env.GIT_COMMIT_MESSAGE }}
+            ```
+
+      - name: Enable auto-merge
+        if: steps.update.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: gh pr merge --auto --rebase "${{ steps.update.outputs.pull-request-number }}"
