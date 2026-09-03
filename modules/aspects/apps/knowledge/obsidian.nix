@@ -21,6 +21,10 @@
           vaults = lib.mapAttrs (name: _: { target = ".vaults/${name}"; }) vaultRepos;
         };
 
+        # The vaults are git repos that track their own .obsidian/ config;
+        # stylix's auto-enabled target would clobber those files with links.
+        stylix.targets.obsidian.enable = false;
+
         home.activation.cloneObsidianVaults = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           export GIT_SSH_COMMAND="${lib.getExe' pkgs.openssh "ssh"} -o StrictHostKeyChecking=accept-new"
           ${lib.concatLines (
