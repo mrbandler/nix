@@ -4,29 +4,23 @@
     includes = [
       den.batteries.define-user
       den.batteries.primary-user
+      den.aspects.cli
+      den.aspects.development
+      den.aspects.development.vcs
       den.aspects.apps
       den.aspects.theme
       den.aspects.security
       den.aspects.storage
+      den.aspects.creative
       den.aspects.desktop.paneru
       den.aspects.desktop.vicinae
       den.aspects.desktop.karabiner
     ];
 
     homeManager =
-      { pkgs, ... }:
+      { config, ... }:
       {
-        home.packages = [
-          pkgs.htop
-          pkgs.zed-editor
-        ];
-        programs.git = {
-          enable = true;
-          settings.user = {
-            name = "mrbandler";
-            email = "me@mrbandler.dev";
-          };
-        };
+        development.devDir = "${config.home.homeDirectory}/Develop";
       };
 
     provides.to-hosts.darwin = {
@@ -36,7 +30,6 @@
         enable = true;
         onActivation.cleanup = "zap";
         caskArgs.appdir = "~/Applications";
-        casks = [ "claude" ];
       };
 
       # macOS account picture (from the old repo's nix/profiles/). The login

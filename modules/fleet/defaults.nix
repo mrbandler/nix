@@ -4,6 +4,12 @@ let
     config.allowUnfree = true;
     overlays = [ inputs.nur.overlays.default ];
   };
+  # An unmanaged file at a managed path is moved to <file>.bak instead of
+  # failing the activation; a stale backup from an earlier takeover is replaced.
+  homeManagerBackup = {
+    backupFileExtension = "bak";
+    overwriteBackup = true;
+  };
 in
 {
   den = {
@@ -15,6 +21,7 @@ in
         ];
         system.stateVersion = 6;
         nixpkgs = nixpkgsDefaults;
+        home-manager = homeManagerBackup;
       };
 
       nixos = {
@@ -24,6 +31,7 @@ in
         ];
         system.stateVersion = "26.05";
         nixpkgs = nixpkgsDefaults;
+        home-manager = homeManagerBackup;
       };
 
       homeManager = {

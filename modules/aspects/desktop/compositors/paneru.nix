@@ -66,10 +66,19 @@
             left = 8;
             right = 8;
           };
-          windows.all = {
-            title = ".*";
-            horizontal_padding = 8;
-            vertical_padding = 8;
+          windows = {
+            all = {
+              title = ".*";
+              horizontal_padding = 8;
+              vertical_padding = 8;
+            };
+            # the window server reports a 0 radius for wezterm's window
+            # although it draws the standard 12; the border would come out square
+            wezterm = {
+              title = ".*";
+              bundle_id = "com.github.wez.wezterm";
+              border_radius = 12.0;
+            };
           };
 
           bindings = {
