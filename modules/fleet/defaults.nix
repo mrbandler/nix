@@ -37,6 +37,9 @@ in
       homeManager = {
         home.stateVersion = "26.05";
         nixpkgs = nixpkgsDefaults;
+        # XDG base directories everywhere: exports XDG_* and keeps the modules
+        # that would otherwise use ~/Library/Application Support in ~/.config
+        xdg.enable = true;
       };
     };
 

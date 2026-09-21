@@ -12,6 +12,15 @@ in
   options.desktop.keybindings = {
     launcher = bind "Mod+Space";
 
+    applications = {
+      terminal = bind "Mod+Return";
+      scratchTerminal = bind "Mod2+Return";
+      fileManager = bind "Mod+E";
+      browser = bind "Mod+B";
+      privateBrowser = bind "Mod2+B";
+      passwordManager = bind "Mod+S";
+    };
+
     monitor = {
       focusMonitorLeft = bind "Mod+N";
       focusMonitorRight = bind "Mod+Period";

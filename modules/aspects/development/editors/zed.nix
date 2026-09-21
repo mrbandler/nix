@@ -39,8 +39,10 @@
           terminal = {
             show_count_badge = false;
             cursor_shape = "underline";
-            # absolute path: a zed launched from the GUI has no nix profile on PATH
+            # absolute path: a zed launched from the GUI has no nix profile on PATH,
+            # and no XDG_CONFIG_HOME either, which nushell needs to find its config
             shell.program = lib.getExe config.programs.nushell.package;
+            env.XDG_CONFIG_HOME = config.xdg.configHome;
             dock = "right";
             button = true;
           };

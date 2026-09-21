@@ -32,13 +32,26 @@
             'Symbola',
           })
           config.adjust_window_size_when_changing_font_size = true
-          -- absolute path: a wezterm launched from the GUI has no nix profile on PATH
+          -- absolute path: a wezterm launched from the GUI has no nix profile on PATH,
+          -- and no XDG_CONFIG_HOME either, which nushell needs to find its config
           config.default_prog = { '${lib.getExe config.programs.nushell.package}' }
+          config.set_environment_variables = { XDG_CONFIG_HOME = '${config.xdg.configHome}' }
 
           -- Disable Alt+Enter fullscreen toggle (managed by window manager)
           config.keys = {
             { key = 'Enter', mods = 'ALT', action = wezterm.action.DisableDefaultAssignment },
           }
+
+          -- the scratch terminal is the window of the "scratch" workspace; the
+          -- window manager finds it by this title prefix
+          wezterm.on('format-window-title', function(tab, pane, tabs, panes, config)
+            local title = tab.active_pane.title
+            local window = wezterm.mux.get_window(tab.window_id)
+            if window and window:get_workspace() == 'scratch' then
+              return 'scratch: ' .. title
+            end
+            return title
+          end)
         '';
       };
     };

@@ -1,6 +1,11 @@
 {
   den.aspects.cli.homeManager =
-    { pkgs, ... }:
+    {
+      config,
+      lib,
+      pkgs,
+      ...
+    }:
     let
       autolock = pkgs.fetchurl {
         url = "https://github.com/fresh2dev/zellij-autolock/releases/download/0.2.2/zellij-autolock.wasm";
@@ -16,7 +21,8 @@
         enable = true;
 
         settings = {
-          default_shell = "nu";
+          # store path: a zellij spawned from the window manager has no nix PATH
+          default_shell = lib.getExe config.programs.nushell.package;
           show_startup_tips = false;
         };
 

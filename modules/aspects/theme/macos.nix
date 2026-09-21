@@ -16,11 +16,20 @@
         pkgs,
         ...
       }:
-      lib.mkIf (pkgs.stdenv.hostPlatform.isDarwin && config.stylix.image != null) {
-        home.activation.setWallpaper = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          /usr/bin/osascript -e 'tell application "System Events" to tell every desktop to set picture to "${config.stylix.image}"' \
-            || echo "setWallpaper: osascript failed — grant Automation (System Events) to the app running the switch" >&2
-        '';
+      lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+        # Linux toolkits: their targets would only litter ~/.gtkrc-2.0,
+        # ~/.themes and ~/.Xresources here
+        stylix.targets = {
+          gtk.enable = false;
+          x11.enable = false;
+        };
+
+        home.activation.setWallpaper = lib.mkIf (config.stylix.image != null) (
+          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            /usr/bin/osascript -e 'tell application "System Events" to tell every desktop to set picture to "${config.stylix.image}"' \
+              || echo "setWallpaper: osascript failed — grant Automation (System Events) to the app running the switch" >&2
+          ''
+        );
       };
   };
 }

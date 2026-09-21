@@ -57,6 +57,9 @@
       home.packages = [ pkgs.nb ];
 
       home.sessionVariables = {
+        # nb defaults to ~/.nb and ~/.nbrc
+        NB_DIR = "${config.xdg.dataHome}/nb";
+        NBRC_PATH = "${config.xdg.configHome}/nb/nbrc";
         NB_EDITOR = "hx";
         NB_DEFAULT_EXTENSION = "md";
         NB_AUTO_SYNC = "1";
