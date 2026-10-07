@@ -37,6 +37,10 @@
             source = "github";
             repo = "neoeinstein/claude-plugins";
           };
+          ponytail.source = {
+            source = "github";
+            repo = "DietrichGebert/ponytail";
+          };
         };
 
         enabledPlugins = {
@@ -49,6 +53,7 @@
           "commit-commands@claude-plugins-official" = true;
           "linear@claude-plugins-official" = true;
           "feature-dev@claude-plugins-official" = true;
+          "ponytail@ponytail" = true;
 
           # LSP
           "typescript-lsp@claude-plugins-official" = true;
@@ -66,7 +71,9 @@
           "skill-creator@claude-plugins-official" = true;
           "hookify@claude-plugins-official" = true;
           "plugin-dev@claude-plugins-official" = true;
-          "semgrep@claude-plugins-official" = true;
+          # opens its hosted-login page on every start; we have no semgrep
+          # account, and security-guidance + /security-review cover this
+          "semgrep@claude-plugins-official" = false;
           "chrome-devtools-mcp@claude-plugins-official" = true;
 
           # Output styles
