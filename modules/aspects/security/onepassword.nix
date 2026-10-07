@@ -27,8 +27,10 @@
         ...
       }:
       let
+        # gh is not here: op authorizes per terminal session, so every
+        # non-interactive call (agents, scripts) re-prompted. It reads an
+        # opnix-provisioned token instead, see the vcs gh aspect.
         plugins = with pkgs; [
-          gh
           hcloud
         ];
         getExeName = package: lib.strings.unsafeDiscardStringContext (baseNameOf (lib.getExe package));
@@ -77,7 +79,11 @@
             };
           };
 
-          onepassword-secrets.tokenFile = "${config.home.homeDirectory}/.config/opnix/token";
+          onepassword-secrets = {
+            enable = true;
+            tokenFile = "${config.home.homeDirectory}/.config/opnix/token";
+            secrets.githubToken = config.lib.opnix.mkSecret "github-token" "op://Nix/gh/token";
+          };
         };
 
         home.file.".config/1Password/ssh/agent.toml".text = ''
