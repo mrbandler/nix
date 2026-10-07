@@ -14,6 +14,9 @@
       nh = "nh ${if isDarwin then "darwin" else "os"}";
       # nh has no rollback for nix-darwin, darwin-rebuild does
       rollback = if isDarwin then "sudo darwin-rebuild --rollback" else "nh os rollback";
+      # casks are upgraded here rather than on activation, with visible output
+      # and interactive sudo; the Brewfile carries the per-cask greedy flags
+      brewUpgrade = lib.optionalString isDarwin "brew bundle --file=/etc/homebrew/Brewfile";
 
       nushellCommands = ''
         # nx - Nix management commands
@@ -33,7 +36,7 @@
         def "nx update" [] { git -C ${flakeDir} pull --ff-only }
         def "nx up" [] { nx update }
 
-        def "nx upgrade" [] { nx update; nx rebuild }
+        def "nx upgrade" [] { nx update; nx rebuild${lib.optionalString isDarwin "; ${brewUpgrade}"} }
         def "nx ug" [] { nx upgrade }
 
         def "nx rollback" [] { ${rollback} }
@@ -78,7 +81,7 @@
             check|ck)     (cd ${flakeDir} && nix flake check) ;;
             show|sw)      (cd ${flakeDir} && nix flake show) ;;
             update|up)    git -C ${flakeDir} pull --ff-only ;;
-            upgrade|ug)   nx update && nx rebuild ;;
+            upgrade|ug)   nx update && nx rebuild${lib.optionalString isDarwin " && ${brewUpgrade}"} ;;
             rollback|rlb) ${rollback} ;;
             history|hy)   sudo nix-env --list-generations --profile /nix/var/nix/profiles/system ;;
             gc)           nh clean user ;;

@@ -23,33 +23,40 @@
         development.devDir = "${config.home.homeDirectory}/Develop";
       };
 
-    provides.to-hosts.darwin = {
-      nix.settings.trusted-users = [ "mrbandler" ];
+    provides.to-hosts.darwin =
+      { config, ... }:
+      {
+        nix.settings.trusted-users = [ "mrbandler" ];
 
-      homebrew = {
-        enable = true;
-        onActivation.cleanup = "zap";
-        caskArgs.appdir = "~/Applications";
+        homebrew = {
+          enable = true;
+          onActivation.cleanup = "zap";
+          caskArgs.appdir = "~/Applications";
+        };
+
+        # upgrades run from `nx upgrade`, not on activation, where they stall
+        # every rebuild with hidden output; a stable path to the generated
+        # Brewfile lets `brew bundle` honour the per-cask greedy flags
+        environment.etc."homebrew/Brewfile".text = config.homebrew.brewfile;
+
+        # macOS account picture (from the old repo's nix/profiles/). The login
+        # window reads the Picture path attribute; System Settings reads the
+        # binary JPEGPhoto attribute, which dscl cannot write — dsimport with an
+        # externalbinary record can (scriptingosx.com/2018/10/changing-a-users-login-picture).
+        system.activationScripts.postActivation.text = lib.mkAfter ''
+          dscl . -delete /Users/mrbandler JPEGPhoto 2>/dev/null || true
+          dscl . -delete /Users/mrbandler Picture 2>/dev/null || true
+          dscl . -create /Users/mrbandler Picture "${./_profiles/mrbandler.png}"
+          PICTURE_IMPORT="$(mktemp)"
+          printf '%s %s\n%s:%s' \
+            "0x0A 0x5C 0x3A 0x2C" \
+            "dsRecTypeStandard:Users 2 dsAttrTypeStandard:RecordName externalbinary:dsAttrTypeStandard:JPEGPhoto" \
+            "mrbandler" "${./_profiles/mrbandler.png}" > "$PICTURE_IMPORT"
+
+          dsimport "$PICTURE_IMPORT" /Local/Default M
+          rm -f "$PICTURE_IMPORT"
+        '';
       };
-
-      # macOS account picture (from the old repo's nix/profiles/). The login
-      # window reads the Picture path attribute; System Settings reads the
-      # binary JPEGPhoto attribute, which dscl cannot write — dsimport with an
-      # externalbinary record can (scriptingosx.com/2018/10/changing-a-users-login-picture).
-      system.activationScripts.postActivation.text = lib.mkAfter ''
-        dscl . -delete /Users/mrbandler JPEGPhoto 2>/dev/null || true
-        dscl . -delete /Users/mrbandler Picture 2>/dev/null || true
-        dscl . -create /Users/mrbandler Picture "${./_profiles/mrbandler.png}"
-        PICTURE_IMPORT="$(mktemp)"
-        printf '%s %s\n%s:%s' \
-          "0x0A 0x5C 0x3A 0x2C" \
-          "dsRecTypeStandard:Users 2 dsAttrTypeStandard:RecordName externalbinary:dsAttrTypeStandard:JPEGPhoto" \
-          "mrbandler" "${./_profiles/mrbandler.png}" > "$PICTURE_IMPORT"
-
-        dsimport "$PICTURE_IMPORT" /Local/Default M
-        rm -f "$PICTURE_IMPORT"
-      '';
-    };
 
     provides.to-hosts.nixos = {
     };
