@@ -10,6 +10,9 @@
     }:
     let
       flakeDir = config.programs.nh.flake;
+      # fast-forwards when there is nothing local; local commits are rebased
+      # onto main and uncommitted changes are stashed around the pull
+      pull = "git -C ${flakeDir} pull --rebase --autostash";
       isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
       nh = "nh ${if isDarwin then "darwin" else "os"}";
       # nh has no rollback for nix-darwin, darwin-rebuild does
@@ -33,7 +36,7 @@
         def "nx show" [] { cd ${flakeDir}; nix flake show }
         def "nx sw" [] { nx show }
 
-        def "nx update" [] { git -C ${flakeDir} pull --ff-only }
+        def "nx update" [] { ${pull} }
         def "nx up" [] { nx update }
 
         def "nx upgrade" [] { nx update; nx rebuild${lib.optionalString isDarwin "; ${brewUpgrade}"} }
@@ -80,7 +83,7 @@
             build|bd)     ${nh} build ;;
             check|ck)     (cd ${flakeDir} && nix flake check) ;;
             show|sw)      (cd ${flakeDir} && nix flake show) ;;
-            update|up)    git -C ${flakeDir} pull --ff-only ;;
+            update|up)    ${pull} ;;
             upgrade|ug)   nx update && nx rebuild${lib.optionalString isDarwin " && ${brewUpgrade}"} ;;
             rollback|rlb) ${rollback} ;;
             history|hy)   sudo nix-env --list-generations --profile /nix/var/nix/profiles/system ;;
