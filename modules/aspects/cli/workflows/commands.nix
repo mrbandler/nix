@@ -123,5 +123,7 @@
     {
       programs.nushell.extraConfig = lib.mkIf config.programs.nushell.enable nushellCommands;
       programs.bash.initExtra = lib.mkIf config.programs.bash.enable bashCommands;
+      # the bash definitions are plain POSIX-ish and run unchanged in zsh
+      programs.zsh.initContent = lib.mkIf config.programs.zsh.enable bashCommands;
     };
 }

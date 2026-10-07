@@ -94,6 +94,22 @@
             }
           '';
 
+      # ed and find shadow standard tools, so like the alias replacements they
+      # stay out of Claude Code's shell snapshot
+      posixCommands = ''
+        ${bashPorts}
+        if [ -z "''${CLAUDECODE:-}" ]; then
+          # ed - Open $EDITOR
+          ed() { "''${EDITOR:-vi}" "$@"; }
+
+          # find - Browse files with tv and bat syntax-highlighted preview
+          find() { tv files ''${1:+"$1"} -p "bat --color=always --style=plain {}"; }
+
+          # search - Search file contents with ripgrep via tv
+          search() { tv ripgrep ''${1:+"$1"}; }
+        fi
+      '';
+
       pipelineCommands = ''
         # ed - Open $EDITOR
         def ed [...args: string] { run-external $env.EDITOR ...$args }
@@ -121,6 +137,7 @@
     in
     {
       programs.nushell.extraConfig = lib.mkIf config.programs.nushell.enable pipelineCommands;
-      programs.bash.initExtra = lib.mkIf config.programs.bash.enable bashPorts;
+      programs.bash.initExtra = lib.mkIf config.programs.bash.enable posixCommands;
+      programs.zsh.initContent = lib.mkIf config.programs.zsh.enable posixCommands;
     };
 }

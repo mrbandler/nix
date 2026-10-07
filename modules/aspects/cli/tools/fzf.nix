@@ -5,6 +5,7 @@
       programs.fzf = {
         enable = true;
         enableBashIntegration = config.programs.bash.enable;
+        enableZshIntegration = config.programs.zsh.enable;
         defaultCommand = lib.mkIf config.programs.fd.enable "fd --type f";
         # Ctrl-R belongs to atuin
         historyWidget.command = "";
