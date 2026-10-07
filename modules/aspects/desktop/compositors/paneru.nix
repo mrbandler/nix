@@ -174,6 +174,24 @@
           end
           return ws:shift(window.id, ws:current(), true):focus(window.id)
         end)
+
+        -- 1Password floats centered at its own size, its unlock and
+        -- authorization prompts above all: since the 8.12.40 update they no
+        -- longer come up as dialogs, so paneru would tile them
+        paneru.on("window_spawned", paneru.match { bundle = [[^com\.1password\.1password$]] }, function(event, ws)
+          local display = ws:display_of(event.window_id)
+          if not display then
+            return ws:float(event.window_id)
+          end
+          local width = math.min(event.frame.width / display.width, 1.0)
+          local height = math.min(event.frame.height / display.height, 1.0)
+          return ws:float(event.window_id, {
+            x = (1.0 - width) / 2,
+            y = (1.0 - height) / 2,
+            width = width,
+            height = height,
+          })
+        end)
       '';
     in
     {
