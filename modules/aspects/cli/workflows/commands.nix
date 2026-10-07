@@ -17,9 +17,10 @@
       nh = "nh ${if isDarwin then "darwin" else "os"}";
       # nh has no rollback for nix-darwin, darwin-rebuild does
       rollback = if isDarwin then "sudo darwin-rebuild --rollback" else "nh os rollback";
-      # casks are upgraded here rather than on activation, with visible output
-      # and interactive sudo; the Brewfile carries the per-cask greedy flags
-      brewUpgrade = lib.optionalString isDarwin "brew bundle --file=/etc/homebrew/Brewfile";
+      # casks upgrade on demand rather than on activation or with every
+      # upgrade: catching up is slow, and here the output and any sudo prompt
+      # are visible. The Brewfile carries the per-cask greedy flags.
+      brewUpgrade = "brew bundle --file=/etc/homebrew/Brewfile";
 
       nushellCommands = ''
         # nx - Nix management commands
@@ -39,8 +40,15 @@
         def "nx update" [] { ${pull} }
         def "nx up" [] { nx update }
 
-        def "nx upgrade" [] { nx update; nx rebuild${lib.optionalString isDarwin "; ${brewUpgrade}"} }
+        def "nx upgrade" [] { nx update; nx rebuild }
         def "nx ug" [] { nx upgrade }
+      ''
+      + lib.optionalString isDarwin ''
+
+        def "nx brew" [] { ${brewUpgrade} }
+        def "nx bw" [] { nx brew }
+      ''
+      + ''
 
         def "nx rollback" [] { ${rollback} }
         def "nx rlb" [] { nx rollback }
@@ -84,7 +92,8 @@
             check|ck)     (cd ${flakeDir} && nix flake check) ;;
             show|sw)      (cd ${flakeDir} && nix flake show) ;;
             update|up)    ${pull} ;;
-            upgrade|ug)   nx update && nx rebuild${lib.optionalString isDarwin " && ${brewUpgrade}"} ;;
+            upgrade|ug)   nx update && nx rebuild ;;
+            ${lib.optionalString isDarwin "brew|bw)      ${brewUpgrade} ;;"}
             rollback|rlb) ${rollback} ;;
             history|hy)   sudo nix-env --list-generations --profile /nix/var/nix/profiles/system ;;
             gc)           nh clean user ;;
@@ -95,7 +104,7 @@
             *)
               echo "nx: unknown command '$cmd'"
               echo "Commands: rebuild(rb) build(bd) check(ck) show(sw) update(up)"
-              echo "          upgrade(ug) rollback(rlb) history(hy)"
+              echo "          upgrade(ug)${lib.optionalString isDarwin " brew(bw)"} rollback(rlb) history(hy)"
               echo "          gc gc-all(gca) optimize(opt) search(sr) repl(rp)"
               return 1
               ;;
