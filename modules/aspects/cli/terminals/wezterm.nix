@@ -1,4 +1,16 @@
 {
+  # macOS takes the vendor-signed cask: TCC grants (App Management, which
+  # home-manager's copyApps needs) are pinned to the code signature, and the
+  # ad-hoc signed nixpkgs build gets a new identity with every update. Only the
+  # nightly cask is current; the stable one is stuck at the 20240203 release.
+  den.aspects.cli.provides.to-hosts.darwin.homebrew.casks = [
+    {
+      name = "wezterm@nightly";
+      # unversioned ("latest"), so brew only upgrades it greedily
+      greedy = true;
+    }
+  ];
+
   den.aspects.cli.homeManager =
     {
       config,
@@ -6,9 +18,21 @@
       pkgs,
       ...
     }:
+    let
+      # stands in for the package so the module's shell integration, and
+      # getExe users like paneru, resolve to the cask app
+      # casks land in ~/Applications (homebrew.caskArgs.appdir)
+      caskApp = "${config.home.homeDirectory}/Applications/WezTerm.app/Contents";
+      cask = pkgs.runCommandLocal "wezterm-cask" { meta.mainProgram = "wezterm"; } ''
+        mkdir -p $out/bin $out/etc/profile.d
+        ln -s ${caskApp}/MacOS/wezterm $out/bin/wezterm
+        ln -s ${caskApp}/Resources/wezterm.sh $out/etc/profile.d/wezterm.sh
+      '';
+    in
     {
       programs.wezterm = {
         enable = true;
+        package = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin cask;
 
         # Colors and fonts come from the stylix target; this is the rest.
         extraConfig = ''
