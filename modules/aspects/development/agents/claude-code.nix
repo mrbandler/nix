@@ -87,6 +87,10 @@
               source = "github";
               repo = "trailofbits/skills";
             };
+            i-have-adhd.source = {
+              source = "github";
+              repo = "ayghri/i-have-adhd";
+            };
           };
 
           enabledPlugins = {
@@ -100,6 +104,7 @@
             "linear@claude-plugins-official" = true;
             "feature-dev@claude-plugins-official" = true;
             "ponytail@ponytail" = true;
+            "i-have-adhd@i-have-adhd" = true;
 
             # Review: test-gap and silent-failure reviewers the built-in
             # /code-review lacks, and CLAUDE.md upkeep
