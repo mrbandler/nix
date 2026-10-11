@@ -1,16 +1,14 @@
 {
   den.aspects.apps = {
     homeManager =
-      { lib, pkgs, ... }:
+      { pkgs, ... }:
       {
-        home.packages =
-          with pkgs;
-          [ telegram-desktop ] ++ lib.optionals stdenv.hostPlatform.isLinux [ whatsapp-electron ];
+        home.packages = with pkgs; [
+          telegram-desktop
+          zapfast
+        ];
       };
 
-    provides.to-hosts.darwin.homebrew.casks = [
-      "whatsapp"
-      "discord"
-    ];
+    provides.to-hosts.darwin.homebrew.casks = [ "discord" ];
   };
 }
