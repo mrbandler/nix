@@ -91,6 +91,13 @@
             Cryptomining = true;
             Fingerprinting = true;
           };
+
+          # vidIQ releases about weekly, too often to pin, so Zen installs it
+          # from AMO and keeps it updated itself
+          ExtensionSettings."firefox@vid.io" = {
+            installation_mode = "force_installed";
+            install_url = "https://addons.mozilla.org/firefox/downloads/latest/vidiq-vision-youtube/latest.xpi";
+          };
         };
 
         profiles.${profile} = {
@@ -102,7 +109,11 @@
             ublock-origin
             onepassword-password-manager
             darkreader
-            # Wikiwand, vidIQ, and Grammarly are installed manually (not in NUR)
+            grammarly
+            wikiwand-wikipedia-modernized
+            # not in NUR: pinned AMO release under _extensions/
+            (pkgs.callPackage ./_extensions/capacities.nix { inherit buildFirefoxXpiAddon; })
+            # vidIQ is installed through policies.ExtensionSettings instead
           ];
 
           search = {
