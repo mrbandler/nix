@@ -55,6 +55,14 @@
       programs.vicinae = {
         enable = true;
 
+        # Upstream pins gcc15Stdenv on Linux, but builds numen with the default
+        # stdenv, which is GCC 16 at our nixpkgs: the GCC 15 libstdc++ lacks
+        # numen's std::format symbols and the link fails. Build both with the
+        # default; drop once upstream stops pinning GCC 15.
+        package = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
+          inputs.vicinae.packages.${system}.default.override { gcc15Stdenv = pkgs.stdenv; }
+        );
+
         systemd = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
           enable = true;
           target = "graphical-session.target";
