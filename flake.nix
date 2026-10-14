@@ -19,6 +19,7 @@
       url = "github:1Password/shell-plugins";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    claude-desktop.url = "github:k3d3/claude-desktop-linux-flake";
     comin = {
       url = "github:nlewo/comin";
       inputs.nixpkgs.follows = "nixpkgs";

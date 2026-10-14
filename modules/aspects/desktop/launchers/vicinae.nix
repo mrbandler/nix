@@ -65,8 +65,11 @@
         };
 
         settings = {
-          # launcher toggle from the shared keybinding contract
-          keybinding = vicinaeChord config.desktop.keybindings.launcher;
+          # launcher toggle from the shared keybinding contract; on Linux the
+          # compositor binds the toggle instead (Wayland has no global hotkeys)
+          keybinding = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
+            vicinaeChord config.desktop.keybindings.launcher
+          );
 
           close_on_focus_loss = true;
           launcher_window.layer_shell.enabled = false;

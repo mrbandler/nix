@@ -71,6 +71,25 @@ in
       center = bind "Mod+C";
       toggleFloating = bind "Mod+V";
       switchFloatingFocus = bind "Mod2+V";
+      toggleTabbed = bind "Mod+T";
+    };
+
+    window = {
+      close = mkOption {
+        default = [
+          "Mod+Q"
+          "Mod+Y"
+        ];
+        type = types.listOf types.str;
+      };
+      overview = bind "Mod+O";
+      inhibitShortcuts = bind "Mod+Escape";
+    };
+
+    shell = {
+      notifications = bind "Mod+G";
+      lock = bind "Mod+A";
+      session = bind "Mod+P";
     };
   };
 }

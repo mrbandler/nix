@@ -12,12 +12,26 @@
   };
 
   den.aspects.security = {
-    provides.to-hosts.darwin.homebrew.casks = [
+    provides.to-hosts =
+      { user, ... }:
       {
-        name = "1password";
-        args.appdir = "/Applications";
-      }
-    ];
+        darwin.homebrew.casks = [
+          {
+            name = "1password";
+            args.appdir = "/Applications";
+          }
+        ];
+
+        # the CLI needs the setgid wrapper and the GUI its polkit owner for
+        # system authentication and the CLI integration
+        nixos.programs = {
+          _1password.enable = true;
+          _1password-gui = {
+            enable = true;
+            polkitPolicyOwners = [ user.userName ];
+          };
+        };
+      };
 
     homeManager =
       {
@@ -61,6 +75,8 @@
         lib.opnix.mkSecret = name: reference: {
           inherit reference;
           path = ".local/share/opnix/secrets/${name}";
+          # opnix's default reads the deprecated stdenv.isDarwin
+          group = if pkgs.stdenv.hostPlatform.isDarwin then "staff" else "users";
         };
 
         programs = {
@@ -93,6 +109,17 @@
         '';
 
         home.file.".config/opnix/.keep".text = "";
+
+        # the SSH agent only answers while the app runs
+        systemd.user.services.onepassword = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+          Unit = {
+            Description = "1Password, started silently";
+            PartOf = [ "graphical-session.target" ];
+            After = [ "graphical-session.target" ];
+          };
+          Service.ExecStart = "/run/current-system/sw/bin/1password --silent";
+          Install.WantedBy = [ "graphical-session.target" ];
+        };
       };
   };
 }

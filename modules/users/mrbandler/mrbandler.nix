@@ -12,9 +12,15 @@
       den.aspects.security
       den.aspects.storage
       den.aspects.creative
+      den.aspects.gaming
+      # each desktop piece applies on its own platform only
       den.aspects.desktop.paneru
-      den.aspects.desktop.vicinae
       den.aspects.desktop.karabiner
+      den.aspects.desktop.niri
+      den.aspects.desktop.noctalia
+      den.aspects.desktop.keyd
+      den.aspects.desktop.nautilus
+      den.aspects.desktop.vicinae
     ];
 
     homeManager =
@@ -22,6 +28,13 @@
       {
         development.devDir = "${config.home.homeDirectory}/Develop";
       };
+
+    # account picture for the greeter (read through AccountsService)
+    provides.to-hosts.nixos.system.activationScripts.userIcon = ''
+      mkdir -p /var/lib/AccountsService/icons /var/lib/AccountsService/users
+      cp ${./_profiles/mrbandler.png} /var/lib/AccountsService/icons/mrbandler
+      printf '[User]\nIcon=/var/lib/AccountsService/icons/mrbandler\n' > /var/lib/AccountsService/users/mrbandler
+    '';
 
     provides.to-hosts.darwin =
       { config, ... }:
@@ -57,8 +70,5 @@
           rm -f "$PICTURE_IMPORT"
         '';
       };
-
-    provides.to-hosts.nixos = {
-    };
   };
 }

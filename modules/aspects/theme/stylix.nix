@@ -6,7 +6,7 @@
   };
 
   den.aspects.theme.homeManager =
-    { pkgs, ... }:
+    { lib, pkgs, ... }:
     {
       imports = [ inputs.stylix.homeModules.stylix ];
 
@@ -31,6 +31,16 @@
         };
 
         opacity.terminal = 0.95;
+
+        # unused, and its target still sets the renamed programs.rofi.font
+        targets.rofi.enable = false;
+
+        # macOS keeps its own cursor
+        cursor = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+          package = pkgs.bibata-cursors;
+          name = "Bibata-Modern-Classic";
+          size = 24;
+        };
       };
     };
 }
