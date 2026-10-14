@@ -5,6 +5,18 @@
     homeManager =
       { lib, pkgs, ... }:
       {
+        # nixpkgs' material-maker ships no desktop entry
+        xdg.desktopEntries.material-maker = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+          name = "Material Maker";
+          genericName = "Material Editor";
+          exec = "material-maker";
+          icon = "${pkgs.material-maker}/share/material-maker/examples/mm_icon.png";
+          categories = [
+            "Graphics"
+            "3DGraphics"
+          ];
+        };
+
         home.packages =
           with pkgs;
           [
@@ -12,8 +24,7 @@
             tenacity
             rapidraw
             # the cask was disabled upstream on 2026-09-01 (fails the Gatekeeper
-            # check); zeus tracked darktable master for the AI modules, that
-            # overlay returns with the host
+            # check); nixpkgs builds it with the AI modules (USE_AI) since 5.6
             darktable
           ]
           ++ lib.optionals stdenv.hostPlatform.isLinux [

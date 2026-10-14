@@ -3,8 +3,11 @@
     homeManager =
       { pkgs, ... }:
       {
-        # the wlroots capture plugin is a Wayland concept and returns with zeus
-        programs.obs-studio.enable = pkgs.stdenv.hostPlatform.isLinux;
+        programs.obs-studio = {
+          enable = pkgs.stdenv.hostPlatform.isLinux;
+          # screen capture on wlroots-style Wayland compositors
+          plugins = [ pkgs.obs-studio-plugins.wlrobs ];
+        };
       };
 
     provides.to-hosts.darwin.homebrew.casks = [ "obs" ];

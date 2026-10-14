@@ -7,6 +7,9 @@
         defaultEditor = false;
         vimAlias = true;
         viAlias = true;
+        # the 26.05 defaults, also on hosts installed earlier
+        withRuby = false;
+        withPython3 = false;
 
         # treesitter parsers compile at runtime
         extraPackages = with pkgs; [

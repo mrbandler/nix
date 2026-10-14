@@ -19,13 +19,86 @@
           "${config.home.homeDirectory}/Library/Application Support/Zen/Profiles/${profile}"
         else
           "${config.xdg.configHome}/zen/${profile}";
+
+      zenProfile = "zen-beta --profile ${config.xdg.configHome}/zen/${profile}";
+      categories = [
+        "Network"
+        "WebBrowser"
+      ];
     in
     {
       imports = [ inputs.zen-browser.homeModules.beta ];
 
+      # Linux: pin launches to the declared profile
+      # (github.com/0xc000022070/zen-browser-flake/issues/179) and make Zen
+      # the default browser
+      home.sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isLinux { MOZ_LEGACY_PROFILES = "1"; };
+
+      xdg = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+        mimeApps = {
+          enable = true;
+          defaultApplications = lib.genAttrs [
+            "text/html"
+            "x-scheme-handler/http"
+            "x-scheme-handler/https"
+            "x-scheme-handler/about"
+            "x-scheme-handler/unknown"
+            "application/xhtml+xml"
+            "application/x-extension-htm"
+            "application/x-extension-html"
+            "application/x-extension-shtml"
+            "application/x-extension-xhtml"
+            "application/x-extension-xht"
+          ] (_: "zen-beta.desktop");
+        };
+
+        desktopEntries = {
+          zen-beta = {
+            name = "Zen";
+            genericName = "Web Browser";
+            exec = "${zenProfile} --name zen-beta %U";
+            icon = "zen-browser";
+            inherit categories;
+            mimeType = [
+              "text/html"
+              "text/xml"
+              "application/xhtml+xml"
+              "application/vnd.mozilla.xul+xml"
+              "x-scheme-handler/http"
+              "x-scheme-handler/https"
+            ];
+            actions = {
+              new-window = {
+                name = "New Window";
+                exec = "${zenProfile} --new-window %U";
+              };
+              new-private-window = {
+                name = "New Private Window";
+                exec = "${zenProfile} --private-window %U";
+              };
+            };
+          };
+
+          zen-beta-private = {
+            name = "Zen (Private)";
+            genericName = "Private Web Browser";
+            exec = "${zenProfile} --private-window %U";
+            icon = "zen-browser";
+            inherit categories;
+          };
+        };
+      };
+
       stylix.targets.zen-browser.profileNames = [ profile ];
 
       home.activation = {
+        # Zen Beta ignores XDG on Linux and recreates ~/.zen on every launch
+        cleanZenLegacyDir = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
+          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            rm -rf "$HOME/.zen"
+          ''
+        );
+
         zenDefaultBrowser = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
           lib.hm.dag.entryAfter [ "writeBoundary" ] ''
             ${pkgs.defaultbrowser}/bin/defaultbrowser zen || true

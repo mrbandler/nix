@@ -29,13 +29,14 @@ in
           "nix-command"
           "flakes"
         ];
-        system.stateVersion = "26.05";
+        # hosts installed earlier keep the release they were installed with
+        system.stateVersion = lib.mkDefault "26.05";
         nixpkgs = nixpkgsDefaults;
         home-manager = homeManagerBackup;
       };
 
       homeManager = {
-        home.stateVersion = "26.05";
+        home.stateVersion = lib.mkDefault "26.05";
         nixpkgs = nixpkgsDefaults;
         # XDG base directories everywhere: exports XDG_* and keeps the modules
         # that would otherwise use ~/Library/Application Support in ~/.config

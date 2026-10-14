@@ -12,6 +12,7 @@
     {
       config,
       lib,
+      pkgs,
       ...
     }:
     let
@@ -201,7 +202,7 @@
       ];
 
       services.paneru = {
-        enable = true;
+        enable = pkgs.stdenv.hostPlatform.isDarwin;
         config = initLua;
       };
     };
