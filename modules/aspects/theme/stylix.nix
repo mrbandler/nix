@@ -32,8 +32,13 @@
 
         opacity.terminal = 0.95;
 
-        # unused, and its target still sets the renamed programs.rofi.font
-        targets.rofi.enable = false;
+        targets = {
+          # unused, and its target still sets the renamed programs.rofi.font
+          rofi.enable = false;
+          # an overlay: rebuilds gtksourceview and all its dependents (inkscape)
+          # from source on every bump, for an editor syntax theme
+          gtksourceview.enable = false;
+        };
 
         # macOS keeps its own cursor
         cursor = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
