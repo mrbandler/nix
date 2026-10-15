@@ -76,16 +76,24 @@ jobs:
         run: nix run nixpkgs#cachix -- push "$CACHIX_CACHE" "$(readlink result-new)"
 
       - name: Build the base commit
+        id: base
         if: github.event_name == 'pull_request'
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           git fetch --depth 1 origin "$BASE"
           git show "$BASE:flake.lock" > old.lock
-          nix build --print-build-logs "github:${{ github.repository }}/$BASE#checks.${{ matrix.system }}.${{ matrix.host }}" -o result-old
+          base="github:${{ github.repository }}/$BASE"
+          # a host added by this PR has no base closure to compare against
+          if [ "$(nix eval "$base#checks.${{ matrix.system }}" --apply 'checks: checks ? ${{ matrix.host }}')" != true ]; then
+            echo "${{ matrix.host }} is new in this pull request, no update report"
+            exit 0
+          fi
+          nix build --print-build-logs "$base#checks.${{ matrix.system }}.${{ matrix.host }}" -o result-old
+          echo "built=true" >> "$GITHUB_OUTPUT"
 
       - name: Update report
-        if: github.event_name == 'pull_request'
+        if: steps.base.outputs.built == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -94,7 +102,7 @@ jobs:
             --old-closure result-old --new-closure result-new > report.md
 
       - uses: marocchino/sticky-pull-request-comment@v3
-        if: github.event_name == 'pull_request'
+        if: steps.base.outputs.built == 'true'
         with:
           header: update-report-${{ matrix.host }}
           path: report.md
