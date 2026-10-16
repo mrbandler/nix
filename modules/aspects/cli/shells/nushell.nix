@@ -45,8 +45,10 @@
 
         # A terminal launched from the GUI (launchd on macOS) starts without the
         # nix profiles on PATH. The POSIX shells get them from the /etc hooks,
-        # nushell has to add them itself.
-        extraEnv = ''
+        # nushell has to add them itself. Linux sessions already have them, and
+        # prepending there would shadow the setuid wrappers (sudo) in
+        # /run/wrappers/bin.
+        extraEnv = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin ''
           $env.PATH = ($env.PATH | prepend [ ${
             lib.concatMapStringsSep " " (p: "\"${p}\"") profileBins
           } ] | uniq)
