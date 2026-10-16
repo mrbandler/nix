@@ -94,20 +94,16 @@
             }
           '';
 
-      # ed and find shadow standard tools, so like the alias replacements they
-      # stay out of Claude Code's shell snapshot
       posixCommands = ''
         ${bashPorts}
-        if [ -z "''${CLAUDECODE:-}" ]; then
-          # ed - Open $EDITOR
-          ed() { "''${EDITOR:-vi}" "$@"; }
+        # ed - Open $EDITOR
+        ed() { "''${EDITOR:-vi}" "$@"; }
 
-          # find - Browse files with tv and bat syntax-highlighted preview
-          find() { tv files ''${1:+"$1"} -p "bat --color=always --style=plain {}"; }
+        # find - Browse files with tv and bat syntax-highlighted preview
+        find() { tv files ''${1:+"$1"} -p "bat --color=always --style=plain {}"; }
 
-          # search - Search file contents with ripgrep via tv
-          search() { tv ripgrep ''${1:+"$1"}; }
-        fi
+        # search - Search file contents with ripgrep via tv
+        search() { tv ripgrep ''${1:+"$1"}; }
       '';
 
       pipelineCommands = ''
