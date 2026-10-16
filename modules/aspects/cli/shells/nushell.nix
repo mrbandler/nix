@@ -48,11 +48,21 @@
         # nushell has to add them itself. Linux sessions already have them, and
         # prepending there would shadow the setuid wrappers (sudo) in
         # /run/wrappers/bin.
-        extraEnv = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin ''
-          $env.PATH = ($env.PATH | prepend [ ${
-            lib.concatMapStringsSep " " (p: "\"${p}\"") profileBins
-          } ] | uniq)
-        '';
+        extraEnv = lib.mkMerge [
+          (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin ''
+            $env.PATH = ($env.PATH | prepend [ ${
+              lib.concatMapStringsSep " " (p: "\"${p}\"") profileBins
+            } ] | uniq)
+          '')
+          # home.sessionPath also only reaches the POSIX shells via hm-session-vars.sh
+          ''
+            $env.PATH = ($env.PATH | prepend [ ${
+              lib.concatMapStringsSep " " (
+                p: "$\"${lib.replaceStrings [ "$HOME" ] [ "($env.HOME)" ] p}\""
+              ) config.home.sessionPath
+            } ] | uniq)
+          ''
+        ];
       };
     };
 }

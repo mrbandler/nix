@@ -10,5 +10,9 @@
         PAGER = "bat --style=plain";
         BROWSER = "zen-beta";
       };
+
+      # user-installed CLIs (e.g. the claude-mem launcher) land here, and their
+      # installers can't edit the nix-managed rc files to add it themselves
+      home.sessionPath = [ "$HOME/.local/bin" ];
     };
 }
