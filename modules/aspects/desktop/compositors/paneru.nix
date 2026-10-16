@@ -42,7 +42,7 @@
 
       # paneru's launchd environment has no nix profile on PATH: store paths only
       wezterm = lib.getExe config.programs.wezterm.package;
-      zellij = lib.getExe config.programs.zellij.package;
+      tuios = lib.getExe pkgs.tuios;
       zen = "${config.home.profileDirectory}/bin/zen-beta";
 
       # what paneru runs when a launch key is pressed
@@ -138,13 +138,13 @@
           '') launches
         )}
 
-        -- scratch terminal: a floating wezterm running the "scratch" zellij
+        -- scratch terminal: a floating wezterm running the "scratch" tuios
         -- session, parked on a workspace nobody looks at while hidden. wezterm
         -- prefixes the title of its "scratch" workspace so the window is found.
         local scratch = {
           stash = 9,
           match = paneru.match { bundle = "com.github.wez.wezterm", title = "^scratch" },
-          spawn = ${builtins.toJSON "${wezterm} start --workspace scratch -- ${zellij} attach --create scratch &"},
+          spawn = ${builtins.toJSON "${wezterm} start --workspace scratch -- ${tuios} attach scratch -c &"},
         }
 
         -- float it once it is recognisable: wezterm sets the title only after the
