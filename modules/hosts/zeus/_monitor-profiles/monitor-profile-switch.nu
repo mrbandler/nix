@@ -50,8 +50,8 @@ def apply-hdr [] {
 }
 
 def apply-toggle [] {
-  let cur = (current-mode | str downcase)
-  if $cur == ($SRGB_VALUE | str downcase) { apply-hdr } else { apply-srgb }
+  let cur = (current-mode | str lowercase)
+  if $cur == ($SRGB_VALUE | str lowercase) { apply-hdr } else { apply-srgb }
 }
 
 def show-status [] {
@@ -59,10 +59,10 @@ def show-status [] {
 }
 
 def show-mode [] {
-  let cur = (current-mode | str downcase)
-  if $cur == ($SRGB_VALUE | str downcase) {
+  let cur = (current-mode | str lowercase)
+  if $cur == ($SRGB_VALUE | str lowercase) {
     print "srgb"
-  } else if $cur == ($HDR_VALUE | str downcase) {
+  } else if $cur == ($HDR_VALUE | str lowercase) {
     print "hdr"
   } else {
     print "unknown"
