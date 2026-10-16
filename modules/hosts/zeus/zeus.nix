@@ -1,6 +1,6 @@
 # Desktop PC: AMD CPU and GPU, LG 38GN950 (DP-1) above a 1080p screen (DP-2).
-# Dual-boots Windows from the firmware boot menu; the disk layout comes from
-# the generated hardware file, which stays untouched.
+# Dual-boots Windows from the firmware boot menu until the next install with
+# the install tool, which gives the whole disk to disko.
 { den, ... }:
 {
   den.hosts.x86_64-linux.zeus.users.mrbandler = { };
@@ -9,9 +9,11 @@
     includes = [ den.aspects.desktop ];
 
     nixos =
-      { pkgs, ... }:
+      { lib, pkgs, ... }:
       {
-        imports = [ ./_hardware-configuration.nix ];
+        # the hand-made install's hardware file, until the install tool writes
+        # facter.json and disko takes over the disk
+        imports = lib.optional (!builtins.pathExists ./facter.json) ./_hardware-configuration.nix;
 
         # installed at 25.11; stateful services follow it, never bump blindly
         system.stateVersion = "25.11";
