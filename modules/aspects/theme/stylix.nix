@@ -15,6 +15,8 @@
 
         base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-mocha.yaml";
         polarity = "dark";
+        # Artemis II: crescent Earth over the lunar far side, NASA art002e015231
+        image = ./_wallpapers/artemis-ii-crescent-earth.jpg;
 
         fonts = {
           monospace = {
