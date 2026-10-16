@@ -65,7 +65,7 @@
       xdg.configFile."tuios/config.d/nix.toml".source = toml.generate "tuios-config.toml" {
         appearance = {
           theme = "catppuccin_mocha";
-          # the same shell wezterm launches, by store path
+          # the same shell the terminal launches, by store path
           preferred_shell = lib.getExe config.programs.nushell.package;
           hide_window_buttons = true;
           shared_borders = false;

@@ -46,18 +46,18 @@
             ++ args
           );
 
-        wezterm = lib.getExe config.programs.wezterm.package;
+        ghostty = lib.getExe config.programs.ghostty.package;
         tuios = lib.getExe pkgs.tuios;
         zen = "${config.home.profileDirectory}/bin/zen-beta";
 
         # the scratch terminal is closed and respawned; its tuios session
         # keeps the state in between
         scratchTerminal = pkgs.writeShellScript "toggle-scratch-terminal" ''
-          id=$(niri msg --json windows | ${lib.getExe pkgs.jq} -r '.[] | select(.app_id == "scratch-terminal") | .id' | head -n1)
+          id=$(niri msg --json windows | ${lib.getExe pkgs.jq} -r '.[] | select(.app_id == "dev.mrbandler.scratch-terminal") | .id' | head -n1)
           if [ -n "$id" ]; then
             niri msg action close-window --id "$id"
           else
-            ${wezterm} start --class scratch-terminal --workspace scratch -- ${tuios} attach scratch -c
+            ${ghostty} --class=dev.mrbandler.scratch-terminal -e ${tuios} attach scratch -c
           fi
         '';
 
@@ -75,10 +75,7 @@
             ]
           }; }"
 
-          (bind app.terminal (spawn [
-            wezterm
-            "start"
-          ]))
+          (bind app.terminal (spawn [ ghostty ]))
           (bind app.scratchTerminal (spawn [ "${scratchTerminal}" ]))
           (bind app.fileManager (spawn [ "nautilus" ]))
           (bind app.browser (spawn [ zen ]))
@@ -257,7 +254,7 @@
           }
 
           window-rule {
-            match app-id="^scratch-terminal$"
+            match app-id="^dev\\.mrbandler\\.scratch-terminal$"
             open-floating true
             open-focused true
             default-column-width { proportion 0.7; }
