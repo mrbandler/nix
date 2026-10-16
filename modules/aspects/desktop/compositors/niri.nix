@@ -47,17 +47,17 @@
           );
 
         wezterm = lib.getExe config.programs.wezterm.package;
-        zellij = lib.getExe config.programs.zellij.package;
+        tuios = lib.getExe pkgs.tuios;
         zen = "${config.home.profileDirectory}/bin/zen-beta";
 
-        # the scratch terminal is closed and respawned; its zellij session
+        # the scratch terminal is closed and respawned; its tuios session
         # keeps the state in between
         scratchTerminal = pkgs.writeShellScript "toggle-scratch-terminal" ''
           id=$(niri msg --json windows | ${lib.getExe pkgs.jq} -r '.[] | select(.app_id == "scratch-terminal") | .id' | head -n1)
           if [ -n "$id" ]; then
             niri msg action close-window --id "$id"
           else
-            ${wezterm} start --class scratch-terminal --workspace scratch -- ${zellij} attach --create scratch
+            ${wezterm} start --class scratch-terminal --workspace scratch -- ${tuios} attach scratch -c
           fi
         '';
 

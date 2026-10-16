@@ -10,7 +10,7 @@
       };
 
       # the MacBook's Touch ID answers sudo (brew cask upgrades ask once per
-      # expired timestamp); reattach lets it work inside zellij/tuios too
+      # expired timestamp); reattach lets it work inside tuios too
       security.pam.services.sudo_local = {
         touchIdAuth = true;
         reattach = true;
