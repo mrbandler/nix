@@ -47,7 +47,6 @@
             reaper
 
             # Game engines
-            godot_4
             unityhub
           ];
       };
@@ -65,7 +64,6 @@
       "krita"
       "inkscape"
       "reaper"
-      "godot"
       "unity-hub"
     ];
   };
