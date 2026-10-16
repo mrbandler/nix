@@ -109,6 +109,53 @@
           system-config-printer
         ];
 
+        # output- and place-specific parts of the Noctalia setup
+        programs.noctalia.settings =
+          let
+            loginBox = output: cx: cy: width: height: {
+              inherit output cx cy;
+              type = "login_box";
+              box_width = 810.0;
+              box_height = 196.0;
+              placement_width = width;
+              placement_height = height;
+              rotation = 0.0;
+              settings = {
+                background_color = "surface_variant";
+                background_opacity = 0.88;
+                background_radius = 12.0;
+                center_password_text = false;
+                input_opacity = 1.0;
+                input_radius = 6.0;
+                layout = "regular";
+                show_caps_lock = true;
+                show_keyboard_layout = true;
+                show_login_button = true;
+                show_media = true;
+                show_session_buttons = true;
+                show_unlock_hint = true;
+                show_weather = true;
+              };
+            };
+          in
+          {
+            brightness.enable_ddcutil = true;
+            location = {
+              latitude = 48.5264991;
+              longitude = 12.2662454;
+            };
+            lockscreen_widgets = {
+              widget_order = [
+                "lockscreen-login-box@DP-1"
+                "lockscreen-login-box@DP-2"
+              ];
+              widget = {
+                "lockscreen-login-box@DP-1" = loginBox "DP-1" 1920.0 1418.0 3840.0 1600.0;
+                "lockscreen-login-box@DP-2" = loginBox "DP-2" 960.0 898.0 1920.0 1080.0;
+              };
+            };
+          };
+
         desktop.niri.extraConfig = ''
           output "DP-1" {
             mode "3840x1600@74.977"
