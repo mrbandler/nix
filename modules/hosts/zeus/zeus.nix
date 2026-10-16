@@ -86,8 +86,6 @@
         # existing profile data lives
         home.stateVersion = "25.11";
 
-        stylix.image = ../../aspects/theme/_wallpapers/12-5/mocha-3840x1600.png;
-
         programs = {
           zsh.dotDir = config.home.homeDirectory;
           firefox.configPath = ".mozilla/firefox";

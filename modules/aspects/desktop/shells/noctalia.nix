@@ -49,6 +49,7 @@
           systemd.enable = true;
           settings = lib.recursiveUpdate (builtins.fromTOML (builtins.readFile ./_noctalia/settings.toml)) {
             shell.launch_apps_as_systemd_services = true;
+            wallpaper.transition = [ "fade" ];
           };
         };
       };
