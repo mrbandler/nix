@@ -1,0 +1,145 @@
+# Set up in Noctalia's Settings UI and copied from
+# ~/.local/state/noctalia/settings.toml. Host-specific values (outputs,
+# location, DDC) live in the host file.
+config_version = 14
+
+[bar]
+order = [ "default", "left" ]
+
+[bar.default]
+center = [ "media", "audio_visualizer", "privacy" ]
+end = [ "tray", "LeftSpacer1", "date", "clock", "weather", "LeftSpacer2", "notifications" ]
+margin_ends = 0
+radius = 8
+start = [ "workspaces", "RightSpacer", "active_window" ]
+
+[bar.left]
+center = [ "network_rx", "network_tx", "temp", "cpu", "ram" ]
+enabled = true
+end = [ "network", "keyboard_layout", "session" ]
+margin_ends = 0
+position = "left"
+radius = 8
+radius_top_left = 0
+show_on_workspace_switch = false
+start = []
+thickness = 30
+
+[calendar]
+enabled = true
+
+[calendar.account.personal_google]
+name = "Vromi's Daily Chaos"
+type = "google"
+
+[control_center.calendar]
+show_week_numbers = true
+
+[desktop_widgets]
+schema_version = 2
+widget_order = []
+
+[desktop_widgets.grid]
+cell_size = 16
+major_interval = 4
+visible = true
+
+[desktop_widgets.widget]
+
+[lockscreen]
+transition = [ "fade" ]
+
+[lockscreen_widgets]
+enabled = false
+schema_version = 2
+
+[lockscreen_widgets.grid]
+cell_size = 16
+major_interval = 4
+visible = true
+
+[notification]
+position = "bottom_right"
+
+[osd]
+offset_y = 20
+position = "bottom_center"
+
+[osd.kinds]
+keyboard_layout = false
+media = false
+
+[shell]
+external_ip_enabled = true
+polkit_agent = true
+screen_time_enabled = true
+telemetry_enabled = true
+
+[widget.LeftSpacer1]
+type = "spacer"
+
+[widget.LeftSpacer2]
+type = "spacer"
+
+[widget.RightSpacer]
+type = "spacer"
+
+[widget.active_window]
+interactive = false
+
+[widget.audio_visualizer]
+bands = 5
+color_2 = "secondary"
+interactive = false
+
+[widget.clock]
+format = "{:%H:%M:%S}"
+interactive = false
+
+[widget.cpu]
+label_show_units = false
+visualization = "none"
+
+[widget.keyboard_layout]
+hide_when_single_layout = true
+
+[widget.media]
+art_size = 14
+hide_when_no_media = true
+show_progress = true
+title_scroll = "on_hover"
+
+[widget.network_rx]
+label_show_units = false
+visualization = "none"
+
+[widget.network_tx]
+label_show_units = false
+visualization = "none"
+
+[widget.privacy]
+hide_inactive = true
+
+[widget.ram]
+label_show_units = false
+visualization = "none"
+
+[widget.sysmon]
+label_show_units = false
+stat = "gpu_temp"
+visualization = "none"
+
+[widget.temp]
+label_show_units = false
+visualization = "none"
+
+[widget.tray]
+drawer = true
+pinned = [ "Steam", "1Password" ]
+
+[widget.weather]
+enabled = false
+
+[widget.workspaces]
+pill_scale = 0.6
+show_labels = false
