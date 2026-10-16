@@ -61,6 +61,22 @@
           "docker"
           "libvirtd"
         ];
+
+        # `nixos-rebuild build-vm` only; the real system is untouched. The
+        # VM starts with a fresh disk, so it needs its own login.
+        virtualisation.vmVariant = {
+          users.users.mrbandler.initialPassword = "password";
+          virtualisation = {
+            memorySize = 8192;
+            cores = 4;
+            # niri needs OpenGL; the default VGA has none
+            qemu.options = [
+              "-vga none"
+              "-device virtio-vga-gl"
+              "-display gtk,gl=on"
+            ];
+          };
+        };
       };
 
     provides.to-users.homeManager =
