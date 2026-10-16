@@ -33,15 +33,46 @@
           "interface/theme/accent_color" = "Color(0.796, 0.651, 0.969, 1)"; # cba6f7
           "interface/theme/contrast" = "0.2";
           "interface/theme/icon_saturation" = "0.6";
+        }
+        # scripts and errors open in Zed at the line, per the gdscript extension's README
+        // lib.optionalAttrs config.programs.zed-editor.enable {
+          "text_editor/external/use_external_editor" = "true";
+          "text_editor/external/exec_path" = ''"${lib.getExe config.programs.zed-editor.package}"'';
+          "text_editor/external/exec_flags" = ''"{project} {file}:{line}:{col}"'';
         };
       in
       {
-        home.packages = lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.godot_4 ];
+        # gdtoolkit brings gdformat and gdlint; Godot itself ships neither
+        home.packages = [
+          pkgs.gdtoolkit_4
+        ]
+        ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux [ pkgs.godot_4 ];
+
+        # Helix knows GDScript but has no server for it: the language server
+        # runs inside the open Godot editor, reached over TCP on Godot's
+        # default port
+        programs.helix.languages = {
+          language-server.godot = {
+            command = lib.getExe pkgs.netcat;
+            args = [
+              "127.0.0.1"
+              "6005"
+            ];
+          };
+          language = [
+            {
+              name = "gdscript";
+              language-servers = [ "godot" ];
+            }
+          ];
+        };
 
         xdg.configFile."godot/text_editor_themes/Catppuccin Mocha.tet" =
-          lib.mkIf pkgs.stdenv.hostPlatform.isLinux { source = theme; };
+          lib.mkIf pkgs.stdenv.hostPlatform.isLinux
+            { source = theme; };
         home.file."Library/Application Support/Godot/text_editor_themes/Catppuccin Mocha.tet" =
-          lib.mkIf pkgs.stdenv.hostPlatform.isDarwin { source = theme; };
+          lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
+            { source = theme; };
 
         # Godot owns its editor settings (one file per minor version) and
         # rewrites them on exit, so the theme keys are set in place in every
