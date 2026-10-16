@@ -1,3 +1,4 @@
+# macOS only; Linux has moved to ghostty.
 {
   # macOS takes the vendor-signed cask: TCC grants (App Management, which
   # home-manager's copyApps needs) are pinned to the code signature, and the
@@ -31,8 +32,8 @@
     in
     {
       programs.wezterm = {
-        enable = true;
-        package = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin cask;
+        enable = pkgs.stdenv.hostPlatform.isDarwin;
+        package = cask;
 
         # Colors and fonts come from the stylix target; this is the rest.
         extraConfig = ''
@@ -41,8 +42,8 @@
           config.enable_scroll_bar = false
           config.enable_tab_bar = false
           config.hide_tab_bar_if_only_one_tab = true
-          -- borderless; macOS keeps the resize edges so the window manager can size it
-          config.window_decorations = '${if pkgs.stdenv.hostPlatform.isDarwin then "RESIZE" else "NONE"}'
+          -- borderless, but with the resize edges so the window manager can size it
+          config.window_decorations = 'RESIZE'
           config.window_padding = {
             left = '0.5cell',
             right = '0.5cell',
