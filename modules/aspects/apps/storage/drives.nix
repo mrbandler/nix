@@ -3,7 +3,7 @@
   den.aspects.storage = {
     # nixpkgs flags ventoy's bundled binary blobs; the version bump on a lock
     # update makes this fail loudly, which is the point
-    includes = [ (den.batteries.insecure [ "ventoy-1.1.17" ]) ];
+    includes = [ (den.batteries.insecure [ "ventoy-1.1.18" ]) ];
 
     homeManager =
       { lib, pkgs, ... }:
