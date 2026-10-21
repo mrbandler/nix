@@ -160,13 +160,21 @@
           output "DP-1" {
             mode "3840x1600@74.977"
             position x=0 y=0
-            variable-refresh-rate
+            variable-refresh-rate on-demand=true
           }
 
           output "DP-2" {
             mode "1920x1080@60.000"
             position x=960 y=1600
-            variable-refresh-rate
+            variable-refresh-rate on-demand=true
+          }
+
+          // VRR only while a game is on screen, so desktop apps and browser
+          // video run at the fixed refresh rate
+          window-rule {
+            match app-id="^steam_app_"
+            match app-id="^gamescope$"
+            variable-refresh-rate true
           }
 
           workspace "1" { open-on-output "DP-2"; }

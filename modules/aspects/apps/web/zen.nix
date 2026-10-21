@@ -308,6 +308,10 @@
             # Media
             "media.hardwaremediakeys.enabled" = false;
             "media.videocontrols.picture-in-picture.enable-when-switching-tabs.enabled" = false;
+            # Linux: decode video on the GPU through VA-API, and keep the
+            # driver blocklist from dropping Zen back to CPU decoding
+            "media.ffmpeg.vaapi.enabled" = lib.mkIf pkgs.stdenv.hostPlatform.isLinux true;
+            "media.hardware-video-decoding.force-enabled" = lib.mkIf pkgs.stdenv.hostPlatform.isLinux true;
 
             # Sync
             "services.sync.declinedEngines" = "passwords,creditcards,addresses";
