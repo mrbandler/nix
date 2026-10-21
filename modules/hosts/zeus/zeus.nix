@@ -174,6 +174,7 @@
           workspace "3" { open-on-output "DP-2"; }
 
           window-rule {
+            match app-id="(?i)capacities"
             match app-id="^zen"
             exclude title="Private Browsing"
             match title="^Claude$"
@@ -200,6 +201,7 @@
             default-column-width { proportion 1.0; }
           }
 
+          spawn-at-startup "capacities"
           spawn-at-startup "zen-beta"
           spawn-at-startup "claude-desktop"
           spawn-at-startup "zapfast"
