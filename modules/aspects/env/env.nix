@@ -1,10 +1,10 @@
 # Session variables ride with the shell, so they feed the cli aspect.
 {
   den.aspects.cli.homeManager =
-    { pkgs, ... }:
+    _:
     {
       home.sessionVariables = {
-        TERMINAL = if pkgs.stdenv.hostPlatform.isLinux then "ghostty" else "wezterm";
+        TERMINAL = "ghostty";
         EDITOR = "hx";
         VISUAL = "zeditor";
         PAGER = "bat --style=plain";
