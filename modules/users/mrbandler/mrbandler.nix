@@ -14,7 +14,7 @@
       den.aspects.creative
       den.aspects.gaming
       # each desktop piece applies on its own platform only
-      den.aspects.desktop.paneru
+      den.aspects.desktop.aerospace
       den.aspects.desktop.karabiner
       den.aspects.desktop.niri
       den.aspects.desktop.noctalia

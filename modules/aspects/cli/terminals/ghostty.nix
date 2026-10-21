@@ -41,7 +41,7 @@
         // (
           if isDarwin then
             {
-              # borderless, but with the native frame so paneru can resize it
+              # borderless, but with the native frame so the window manager can resize it
               macos-titlebar-style = "hidden";
               # a Ghostty launched from the GUI has no XDG_CONFIG_HOME, which
               # nushell needs to find its config
