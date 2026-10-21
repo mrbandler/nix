@@ -41,13 +41,14 @@
         );
 
       # paneru's launchd environment has no nix profile on PATH: store paths only
-      wezterm = lib.getExe config.programs.wezterm.package;
+      # the CLI cannot open windows on macOS; every window is its own instance
+      ghostty = "open -na ${config.programs.ghostty.package}/Applications/Ghostty.app";
       tuios = lib.getExe pkgs.tuios;
       zen = "${config.home.profileDirectory}/bin/zen-beta";
 
       # what paneru runs when a launch key is pressed
       launches = {
-        ${kb.applications.terminal} = "${wezterm} start";
+        ${kb.applications.terminal} = ghostty;
         ${kb.applications.fileManager} = "open ~";
         ${kb.applications.browser} = zen;
         ${kb.applications.privateBrowser} = "${zen} --private-window";
@@ -83,13 +84,6 @@
             title = ".*";
             horizontal_padding = 8;
             vertical_padding = 8;
-          };
-          # the window server reports a 0 radius for wezterm's window
-          # although it draws the standard 12; the border would come out square
-          wezterm = {
-            title = ".*";
-            bundle_id = "com.github.wez.wezterm";
-            border_radius = 12.0;
           };
         };
 
@@ -138,17 +132,17 @@
           '') launches
         )}
 
-        -- scratch terminal: a floating wezterm running the "scratch" tuios
-        -- session, parked on a workspace nobody looks at while hidden. wezterm
-        -- prefixes the title of its "scratch" workspace so the window is found.
+        -- scratch terminal: a floating ghostty running the "scratch" tuios
+        -- session, parked on a workspace nobody looks at while hidden. Its
+        -- fixed "scratch" title is how the window is found.
         local scratch = {
           stash = 9,
-          match = paneru.match { bundle = "com.github.wez.wezterm", title = "^scratch" },
-          spawn = ${builtins.toJSON "${wezterm} start --workspace scratch -- ${tuios} attach scratch -c &"},
+          match = paneru.match { bundle = "com.mitchellh.ghostty", title = "^scratch" },
+          spawn = ${builtins.toJSON "${ghostty} --args --title=scratch -e ${tuios} attach scratch -c &"},
         }
 
-        -- float it once it is recognisable: wezterm sets the title only after the
-        -- window exists, so the spawn event may still carry the initial title
+        -- float it once it is recognisable: the spawn event may still carry the
+        -- initial title
         local function place(ws, id)
           local window = ws:find(scratch.match)
           if window and window.id == id and not window.floating then

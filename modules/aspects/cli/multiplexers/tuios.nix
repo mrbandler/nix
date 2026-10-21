@@ -14,55 +14,7 @@
       toml = pkgs.formats.toml { };
       tuios = lib.getExe pkgs.tuios;
 
-      configStub = pkgs.writeText "tuios-config-stub.toml" ''
-        # Settings changed in the tuios UI land here and override config.d/nix.toml
-        # until they are carried into the Nix config.
-
-        [startup]
-        daemon = true
-      '';
-
-      # The hook entries `tuios integration install claude-code` writes, by
-      # store path. --integration is tuios's version marker: when
-      # `tuios integration status` reports them outdated, copy the new set.
-      claudeHook = timeout: {
-        hooks = [
-          {
-            type = "command";
-            command = "${tuios} agent-hook claude-code --integration 3";
-            inherit timeout;
-          }
-        ];
-      };
-      claudeEvents = [
-        "SessionStart"
-        "UserPromptSubmit"
-        "PreToolUse"
-        "PostToolUse"
-        "PostToolUseFailure"
-        "PermissionDenied"
-        "ElicitationResult"
-        "Notification"
-        "Stop"
-        "StopFailure"
-        "SessionEnd"
-        "SubagentStart"
-        "SubagentStop"
-      ];
-
-      # Pi's integration is a whole extension file, so tuios writes it at
-      # build time and it follows the pinned tuios version on its own
-      piExtension = pkgs.runCommand "tuios-pi-extension" { } ''
-        export HOME=$TMPDIR
-        mkdir -p $HOME/.pi/agent
-        ${tuios} integration install pi --command ${tuios}
-        cp $HOME/.pi/agent/extensions/tuios-agent-state.ts $out
-      '';
-    in
-    {
-      home.packages = [ pkgs.tuios ];
-
-      xdg.configFile."tuios/config.d/nix.toml".source = toml.generate "tuios-config.toml" {
+      nixConfig = toml.generate "tuios-config.toml" {
         appearance = {
           theme = "catppuccin_mocha";
           # the same shell the terminal launches, by store path
@@ -111,6 +63,61 @@
           effect = "matrix";
         };
       };
+
+      configStub = pkgs.writeText "tuios-config-stub.toml" ''
+        # Settings changed in the tuios UI land here and override config.d/nix.toml
+        # until they are carried into the Nix config.
+
+        [startup]
+        daemon = true
+      '';
+
+      # The hook entries `tuios integration install claude-code` writes, by
+      # store path. --integration is tuios's version marker: when
+      # `tuios integration status` reports them outdated, copy the new set.
+      claudeHook = timeout: {
+        hooks = [
+          {
+            type = "command";
+            command = "${tuios} agent-hook claude-code --integration 3";
+            inherit timeout;
+          }
+        ];
+      };
+      claudeEvents = [
+        "SessionStart"
+        "UserPromptSubmit"
+        "PreToolUse"
+        "PostToolUse"
+        "PostToolUseFailure"
+        "PermissionDenied"
+        "ElicitationResult"
+        "Notification"
+        "Stop"
+        "StopFailure"
+        "SessionEnd"
+        "SubagentStart"
+        "SubagentStop"
+      ];
+
+      # Pi's integration is a whole extension file, so tuios writes it at
+      # build time and it follows the pinned tuios version on its own
+      piExtension = pkgs.runCommand "tuios-pi-extension" { } ''
+        export HOME=$TMPDIR
+        mkdir -p $HOME/.pi/agent
+        ${tuios} integration install pi --command ${tuios}
+        cp $HOME/.pi/agent/extensions/tuios-agent-state.ts $out
+      '';
+    in
+    {
+      home.packages = [ pkgs.tuios ];
+
+      # copied, not linked: tuios also watches the directory a linked config
+      # points into, and on macOS (kqueue) watching /nix/store holds one open
+      # file per store entry, tens of thousands per tuios process
+      home.activation.tuiosNixConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        run install -Dm444 ${nixConfig} ${lib.escapeShellArg "${config.xdg.configHome}/tuios/config.d/nix.toml"}
+      '';
 
       # Without a config.toml tuios ignores config.d, and without a [startup]
       # table in it a session starts floating and daemonless. A fresh install

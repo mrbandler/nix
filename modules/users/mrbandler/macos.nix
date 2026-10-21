@@ -51,7 +51,9 @@
     loginwindow.LoginwindowText = "It's about consistency and being consistent.";
 
     CustomUserPreferences = {
-      "com.apple.spaces"."spans-displays" = false;
+      # "Displays have separate Spaces" off, as AeroSpace recommends (needs a
+      # logout to apply)
+      "com.apple.spaces"."spans-displays" = true;
       "com.apple.finder" = {
         SidebarShowingiCloudDesktop = false;
         ShowRecentTags = false;

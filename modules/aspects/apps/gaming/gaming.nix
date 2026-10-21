@@ -1,5 +1,6 @@
-# Opt-in, included by the user. Linux only: Steam, launchers and emulators
-# with the system tweaks they rely on.
+# Opt-in, included by the user. Linux gets Steam, launchers and emulators with
+# the system tweaks they rely on; macOS only the Steam and itch casks, Game
+# Mode and controller support are built in there.
 {
   den.aspects.gaming = {
     provides.to-hosts.nixos =
@@ -34,6 +35,11 @@
         boot.kernelModules = [ "ntsync" ];
         boot.kernel.sysctl."vm.max_map_count" = 2147483642;
       };
+
+    provides.to-hosts.darwin.homebrew.casks = [
+      "steam"
+      "itch"
+    ];
 
     homeManager =
       { lib, pkgs, ... }:
