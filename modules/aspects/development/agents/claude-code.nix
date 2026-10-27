@@ -25,7 +25,12 @@
 
         context = ./_claude-code/CLAUDE.md;
 
+        outputStyles.absolute = ./_claude-code/output-styles/absolute.md;
+
         settings = {
+          # matches the style's `name`, case-sensitive
+          outputStyle = "Absolute";
+
           # written by the desktop app before this file was managed; kept so
           # the takeover below loses nothing
           agentPushNotifEnabled = true;
