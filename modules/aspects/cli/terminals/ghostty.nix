@@ -12,6 +12,10 @@
       inherit (pkgs.stdenv.hostPlatform) isDarwin;
     in
     {
+      # Ghostty starts every shell through /usr/bin/login on macOS, which prints
+      # "Last login: ..." unless this file exists (login(1))
+      home.file.".hushlogin" = lib.mkIf isDarwin { text = ""; };
+
       programs.ghostty = {
         enable = true;
         # macOS takes the upstream app with its Developer ID signature intact:
