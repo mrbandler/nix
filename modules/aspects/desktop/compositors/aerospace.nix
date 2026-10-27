@@ -50,6 +50,29 @@
       # is how the window is found.
       # Ghostty titles the window only after it exists, too late for
       # on-window-detected, so the script floats it once the title shows up.
+      # AeroSpace cannot size or place floating windows (upstream #9, #494), so
+      # Ghostty opens at niri's 70% x 60%, centered: the focused screen's usable
+      # area (AppKit, no permission needed) as a size in cells and a position,
+      # which Ghostty takes relative to the visible area's top-left corner.
+      # ponytail: cell size and window overhead measured on hermes (16pt
+      # JetBrains Mono, -10% cell height); retune if the font changes.
+      # NSScreen.mainScreen is a best guess at the focused display.
+      scratchGeometry = pkgs.writeText "scratch-terminal-geometry.js" ''
+        ObjC.import("AppKit");
+        const cell = { width: 9.5, height: 19.1 };
+        const overhead = { width: 40, height: 27 };
+        const f = $.NSScreen.mainScreen.visibleFrame;
+        const cols = Math.round((f.size.width * 0.7 - overhead.width) / cell.width);
+        const rows = Math.round((f.size.height * 0.6 - overhead.height) / cell.height);
+        const w = cols * cell.width + overhead.width;
+        const h = rows * cell.height + overhead.height;
+        [
+          `--window-width=''${cols}`,
+          `--window-height=''${rows}`,
+          `--window-position-x=''${Math.round((f.size.width - w) / 2)}`,
+          `--window-position-y=''${Math.round((f.size.height - h) / 2)}`,
+        ].join(" ");
+      '';
       scratchTerminal = pkgs.writeShellScript "toggle-scratch-terminal" ''
         find() {
           ${aerospace} list-windows --all --json \
@@ -61,7 +84,9 @@
         if [ -z "$id" ]; then
           # one --command argument: Ghostty 1.3.1 takes a bare path argument
           # (`-e /nix/store/...`) for a file to open and asks before running it
-          ${ghostty} --args --title=scratch "--command=${lib.getExe pkgs.tuios} attach scratch -c"
+          # shellcheck disable=SC2046
+          ${ghostty} --args --title=scratch $(/usr/bin/osascript -l JavaScript ${scratchGeometry}) \
+            "--command=${lib.getExe pkgs.tuios} attach scratch -c"
           for _ in $(seq 50); do
             id=$(find)
             [ -n "$id" ] && exec ${aerospace} layout --window-id "''${id%% *}" floating
@@ -88,6 +113,10 @@
           launchd.enable = true;
 
           settings = {
+            config-version = 2;
+            # version 2 no longer infers these from the bindings
+            persistent-workspaces = map toString (lib.range 1 9);
+
             gaps = {
               inner.horizontal = 8;
               inner.vertical = 8;
@@ -102,6 +131,14 @@
             on-focused-monitor-changed = [ "move-mouse monitor-lazy-center" ];
 
             on-window-detected = [
+              {
+                # the script floats it too, should Ghostty title it late
+                "if" = {
+                  app-id = "com.mitchellh.ghostty";
+                  window-title-regex-substring = "^scratch$";
+                };
+                run = [ "layout floating" ];
+              }
               {
                 # 1Password's unlock and authorization prompts are not dialogs
                 # to macOS; tiled they squash the layout
@@ -157,6 +194,21 @@
             // numBinds kb.navigation.moveToWorkspacePrefix "move-node-to-workspace";
           };
         };
+
+        # the module reloads only from the config file's onChange, which has not
+        # always taken effect; reload on every activation, once the new config
+        # is linked and the agent is up
+        home.activation.aerospaceReload =
+          lib.hm.dag.entryAfter
+            [
+              "onFilesChange"
+              "setupLaunchAgents"
+            ]
+            ''
+              if ${aerospace} list-modes --current >/dev/null 2>&1; then
+                run ${aerospace} reload-config
+              fi
+            '';
 
         # the focus outline paneru used to draw
         services.jankyborders = {
