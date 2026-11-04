@@ -125,13 +125,8 @@
             "pr-review-toolkit@claude-plugins-official" = true;
             "claude-md-management@claude-plugins-official" = true;
 
-            # LSP: the binaries come from each project's devenv
-            "typescript-lsp@claude-plugins-official" = true;
-            "rust-analyzer-lsp@claude-plugins-official" = true;
-            # no Go, C#, Lua or C++ projects, and no binaries for them
-            "gopls-lsp@claude-plugins-official" = false;
-            "csharp-lsp@claude-plugins-official" = false;
-            "clangd-lsp@claude-plugins-official" = false;
+            # LSP: devenv-lsp.nix starts the servers from each project's devenv
+            # and turns off the official plugins it replaces; no Lua projects
             "lua-lsp@claude-plugins-official" = false;
 
             # Rust
