@@ -15,9 +15,13 @@ cache_read=$(echo "$input" | jq -r '.context_window.current_usage.cache_read_inp
 home_dir="$HOME"
 display_dir="${cwd/#$home_dir/\~}"
 
+# jj repo (colocated or not): `jj root` searches parent dirs, `-R` does not.
+# --ignore-working-copy keeps the status line from snapshotting, so markers reflect the last snapshot.
+jj_root=$(cd "$cwd" 2>/dev/null && jj root --ignore-working-copy 2>/dev/null)
+
 # Git branch (skip optional locks to avoid stalling)
 git_branch=""
-if git -C "$cwd" rev-parse --is-inside-work-tree --quiet >/dev/null 2>&1; then
+if [ -z "$jj_root" ] && git -C "$cwd" rev-parse --is-inside-work-tree --quiet >/dev/null 2>&1; then
   git_branch=$(git -C "$cwd" -c core.fsync=none symbolic-ref --short HEAD 2>/dev/null \
     || git -C "$cwd" -c core.fsync=none rev-parse --short HEAD 2>/dev/null)
 fi
@@ -67,6 +71,27 @@ if [ -n "$git_branch" ]; then
     branch_str+=$(printf " [%b]" "$joined")
   fi
   result+="$(printf ' \033[2mon\033[0m \033[1;35m%s\033[0m' " $branch_str")"
+fi
+
+# jj change + nearest bookmark - bold magenta like the git branch
+if [ -n "$jj_root" ]; then
+  jj_opts=(-R "$jj_root" --ignore-working-copy --no-graph --color never)
+  # Short change id of @, then "=" for a conflict and "!" for a non-empty change
+  jj_change=$(jj log "${jj_opts[@]}" -r @ \
+    -T 'change_id.shortest() ++ if(conflict, " =") ++ if(!empty, " !")' 2>/dev/null)
+  # Nearest bookmark on @ or an ancestor
+  jj_bookmark=$(jj log "${jj_opts[@]}" --limit 1 -r 'heads(::@ & bookmarks())' \
+    -T 'local_bookmarks.map(|b| b.name()).join(" ")' 2>/dev/null)
+
+  # First line of @'s description, cut to keep the line short
+  jj_desc=$(jj log "${jj_opts[@]}" -r @ \
+    -T 'truncate_end(40, description.first_line(), "…")' 2>/dev/null)
+
+  read -r jj_id jj_markers <<<"$jj_change"
+  jj_str="${jj_bookmark:+$jj_bookmark }$jj_id"
+  [ -n "$jj_markers" ] && jj_str+=" [${jj_markers// /}]"
+  result+="$(printf ' \033[2mon\033[0m \033[1;35m%s\033[0m' " $jj_str")"
+  [ -n "$jj_desc" ] && result+="$(printf ' \033[3m%s\033[0m' "$jj_desc")"
 fi
 
 # Context usage with progress bar
