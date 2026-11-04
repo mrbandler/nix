@@ -25,8 +25,10 @@
             backend = "ssh";
             inherit (vcs.signing) key;
             backends.ssh.program = vcs.signing.program;
-            behavior = "own"; # sign every own commit, like git's signByDefault
+            behavior = "drop"; # local commits stay unsigned, so 1Password isn't asked on every snapshot
           };
+
+          git.sign-on-push = true; # sign at the push instead
 
           "--scope" = lib.mapAttrsToList (path: user: {
             "--when".repositories = [ path ];
