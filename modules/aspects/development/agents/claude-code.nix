@@ -15,6 +15,22 @@
         type = "command";
         command = ''[ -n "$CLAUDE_ENV_FILE" ] && ${lib.getExe config.programs.direnv.package} export bash > "$CLAUDE_ENV_FILE" || true'';
       };
+
+      # jj usage guide, tested on jj 0.46. Its colocated section sends the
+      # agent to `git checkout`; changes should go through jj only.
+      jujutsuSkill = pkgs.runCommandLocal "jujutsu-skill" { } ''
+        cp -r ${
+          pkgs.fetchFromGitHub {
+            owner = "danverbraganza";
+            repo = "jujutsu-skill";
+            rev = "85a8376a3a0d5cf16ecb9b0fb0f3f48a48ce62c2";
+            hash = "sha256-+6xM0G/o9qHLdDogFAWI96t3lYK5h26iXyN/IPU1xC0=";
+          }
+        }/jujutsu $out
+        chmod -R u+w $out
+        sed -i '/^### Switching Between jj and git/,/^### Pushing Changes/{/^### Pushing Changes/!d}' $out/SKILL.md
+        ! grep -q 'git checkout' $out/SKILL.md
+      '';
     in
     {
       # opt-in flag for the i-have-adhd plugin's SessionStart hook, which then
@@ -30,6 +46,8 @@
         context = ./_claude-code/CLAUDE.md;
 
         outputStyles.absolute = ./_claude-code/output-styles/absolute.md;
+
+        skills.jujutsu = jujutsuSkill;
 
         settings = {
           # matches the style's `name`, case-sensitive
@@ -52,18 +70,21 @@
           # Human in the loop at both ends: sessions start by planning, and
           # anything that leaves the machine or throws work away asks first.
           # Paths are ~/ or **/: a bare /path in user settings means ~/.claude.
+          # Commits and pushes are gated by the mrbandler plugin's hook, so a
+          # session grant can allow them; an ask rule here would override it.
           permissions = {
             defaultMode = "plan";
             ask = [
-              "Bash(git push *)"
-              "Bash(gh pr create *)"
-              "Bash(gh pr merge *)"
               "Bash(git reset --hard *)"
               "Bash(git clean *)"
+              "Bash(jj abandon *)"
+              "Bash(jj op restore *)"
             ];
             deny = [
               "Bash(git push --force *)"
               "Bash(git push -f *)"
+              "Edit(~/.local/state/claude-grants/**)"
+              "Write(~/.local/state/claude-grants/**)"
               "Read(~/.ssh/**)"
               "Read(~/.aws/**)"
               "Read(~/.config/gh/**)"
@@ -80,10 +101,6 @@
           };
 
           extraKnownMarketplaces = {
-            superpowers-marketplace.source = {
-              source = "github";
-              repo = "obra/superpowers-marketplace";
-            };
             neoeinstein-plugins.source = {
               source = "github";
               repo = "neoeinstein/claude-plugins";
@@ -108,11 +125,9 @@
 
           enabledPlugins = {
             # Core
-            "superpowers@superpowers-marketplace" = true;
-            "context7@claude-plugins-official" = true;
+            "superpowers@claude-plugins-official" = true;
             "remember@claude-plugins-official" = true;
             "security-guidance@claude-plugins-official" = true;
-            "commit-commands@claude-plugins-official" = true;
             "ponytail@ponytail" = true;
             "i-have-adhd@i-have-adhd" = true;
             "caveman@caveman" = true;
@@ -141,6 +156,10 @@
             # account, and security-guidance + /security-review cover this
             "semgrep@claude-plugins-official" = false;
             "chrome-devtools-mcp@claude-plugins-official" = true;
+
+            # synced from the claude.ai account: its skills compete with
+            # superpowers and /code-review, its MCP servers are unauthenticated
+            "engineering@synced" = false;
 
             # Output styles: both injected overlapping instructions into
             # every session
