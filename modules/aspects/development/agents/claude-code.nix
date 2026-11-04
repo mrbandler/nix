@@ -110,12 +110,9 @@
             # Core
             "superpowers@superpowers-marketplace" = true;
             "context7@claude-plugins-official" = true;
-            "github@claude-plugins-official" = true;
             "remember@claude-plugins-official" = true;
             "security-guidance@claude-plugins-official" = true;
             "commit-commands@claude-plugins-official" = true;
-            "linear@claude-plugins-official" = true;
-            "feature-dev@claude-plugins-official" = true;
             "ponytail@ponytail" = true;
             "i-have-adhd@i-have-adhd" = true;
             "caveman@caveman" = true;
@@ -139,7 +136,6 @@
             # duplicates the built-in /simplify
             "code-simplifier@claude-plugins-official" = false;
             "skill-creator@claude-plugins-official" = true;
-            "hookify@claude-plugins-official" = true;
             "plugin-dev@claude-plugins-official" = true;
             # opens its hosted-login page on every start; we have no semgrep
             # account, and security-guidance + /security-review cover this
