@@ -12,7 +12,8 @@
         enableNushellIntegration = true;
         presets = [ "nerd-font-symbols" ];
         settings = {
-          format = "$shell$all$character";
+          # vcs right after the directory, where the git modules sit by default
+          format = "$shell$directory\${custom.vcs}$all$character";
           os.disabled = true;
           shell = {
             disabled = false;
