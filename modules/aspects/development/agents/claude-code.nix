@@ -53,6 +53,9 @@
           # matches the style's `name`, case-sensitive
           outputStyle = "Absolute";
 
+          # model default is medium for the 5.5 family
+          effortLevel = "high";
+
           # written by the desktop app before this file was managed; kept so
           # the takeover below loses nothing
           agentPushNotifEnabled = true;
