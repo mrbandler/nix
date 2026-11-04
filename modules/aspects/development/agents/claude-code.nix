@@ -84,7 +84,6 @@
               "Bash(git push --force *)"
               "Bash(git push -f *)"
               "Edit(~/.local/state/claude-grants/**)"
-              "Write(~/.local/state/claude-grants/**)"
               "Read(~/.ssh/**)"
               "Read(~/.aws/**)"
               "Read(~/.config/gh/**)"
@@ -152,9 +151,6 @@
             "code-simplifier@claude-plugins-official" = false;
             "skill-creator@claude-plugins-official" = true;
             "plugin-dev@claude-plugins-official" = true;
-            # opens its hosted-login page on every start; we have no semgrep
-            # account, and security-guidance + /security-review cover this
-            "semgrep@claude-plugins-official" = false;
             "chrome-devtools-mcp@claude-plugins-official" = true;
 
             # synced from the claude.ai account: its skills compete with
