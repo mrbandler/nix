@@ -17,6 +17,10 @@
       };
     in
     {
+      # opt-in flag for the i-have-adhd plugin's SessionStart hook, which then
+      # injects its rules into every session (hooks/always-on.mjs)
+      home.file.".claude/.i-have-adhd-always".text = "";
+
       programs.claude-code = {
         enable = true;
 
@@ -96,6 +100,10 @@
               source = "github";
               repo = "ayghri/i-have-adhd";
             };
+            caveman.source = {
+              source = "github";
+              repo = "JuliusBrussee/caveman";
+            };
           };
 
           enabledPlugins = {
@@ -110,6 +118,7 @@
             "feature-dev@claude-plugins-official" = true;
             "ponytail@ponytail" = true;
             "i-have-adhd@i-have-adhd" = true;
+            "caveman@caveman" = true;
 
             # Review: test-gap and silent-failure reviewers the built-in
             # /code-review lacks, and CLAUDE.md upkeep

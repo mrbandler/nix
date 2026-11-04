@@ -4,6 +4,7 @@
 - Start every reply to me with my name, "Michael". If a reply doesn't, I know these instructions were not loaded.
 - Never use em dashes in anything you write for me or in my name: chat, code comments, commits, PRs, issues, docs.
 - No self credit: no `Co-Authored-By` trailers and no "Generated with Claude Code" lines in commits, PRs or issues.
+- Commit messages: one short subject line in the project's convention. Add a body only when the subject cannot carry the reason, for example a complex change or a bug with several layers. Then keep the body to a few lines.
 
 ## Checkpoints
 - Before you commit, push, open a PR or post anything, show me the exact text (commit message, PR or issue body) and wait for my approval.
