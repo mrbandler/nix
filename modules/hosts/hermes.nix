@@ -15,6 +15,12 @@
         touchIdAuth = true;
         reattach = true;
       };
+
+      # keep the MacBook awake on AC power so background agents keep running;
+      # the display can still sleep, and battery settings stay as they are
+      system.activationScripts.power.text = ''
+        pmset -c sleep 0 displaysleep 30
+      '';
     };
 
     provides.to-users =
