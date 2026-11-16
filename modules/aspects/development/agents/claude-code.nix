@@ -53,8 +53,62 @@
           # matches the style's `name`, case-sensitive
           outputStyle = "Absolute";
 
+          model = "opus";
+          # keeps a session working while the primary model is unavailable
+          fallbackModel = [ "sonnet" ];
           # model default is medium for the 5.5 family
           effortLevel = "high";
+          # reviews often pause a session longer than the 5m default
+          promptCacheTtl = "1h";
+          showThinkingSummaries = true;
+
+          # Approvals reach the phone and wait for an answer
+          inputNeededNotifEnabled = true;
+          dialogExpiry = "never";
+
+          theme = "dark-ansi"; # Stylix sets the terminal ANSI colors
+          timeFormat = "24-hour";
+          spinnerTipsEnabled = false;
+          feedbackSurveyRate = 0;
+          cleanupPeriodDays = 90;
+
+          # claude.ai synced skills that coding sessions don't need;
+          # skill-creator duplicates the plugin of the same name
+          skillOverrides = lib.genAttrs [
+            "docx"
+            "pptx"
+            "xlsx"
+            "docs"
+            "google-workspace"
+            "morning"
+            "import-memory"
+            "computer-use"
+            "skill-creator"
+          ] (_: "off");
+
+          # Bash runs in a Seatbelt sandbox, so commands can't read secrets the
+          # Read deny rules below only keep from the file tools
+          sandbox = {
+            enabled = true;
+            filesystem = {
+              denyRead = [
+                "~/.ssh"
+                "~/.aws"
+                "~/.config/gh"
+                "~/.config/opnix"
+                "~/.local/share/opnix"
+                "**/.env"
+                "**/.env.*"
+              ];
+              # nix and direnv caches outside the project
+              allowWrite = [
+                "~/.cache/nix"
+                "~/.local/state/nix"
+                "~/.local/share/direnv"
+              ];
+            };
+            network.allowUnixSockets = [ "/nix/var/nix/daemon-socket/socket" ];
+          };
 
           # written by the desktop app before this file was managed; kept so
           # the takeover below loses nothing
@@ -63,6 +117,7 @@
           attribution = {
             commit = "";
             pr = "";
+            sessionUrl = false;
           };
 
           statusLine = {
@@ -77,6 +132,7 @@
           # session grant can allow them; an ask rule here would override it.
           permissions = {
             defaultMode = "plan";
+            disableBypassPermissionsMode = "disable";
             ask = [
               "Bash(git reset --hard *)"
               "Bash(git clean *)"
