@@ -8,7 +8,7 @@
     }:
     let
       # LSP servers start by name from Claude Code's own PATH, so the language
-      # servers from each project's devenv never start. This local marketplace
+      # servers from each project's devenv never start. This local plugin
       # starts them through `direnv exec` in the project dir instead.
       # Commands and extension maps follow the official claude-plugins-official
       # LSP plugins; add a language when a devenv has its server.
@@ -170,40 +170,14 @@
           lspServers = lib.mapAttrs viaDirenv servers;
         }
       );
-      marketplace = pkgs.symlinkJoin {
-        name = "devenv-lsp-marketplace";
-        paths = [
-          plugin
-          (pkgs.writeTextDir ".claude-plugin/marketplace.json" (
-            builtins.toJSON {
-              name = "devenv-lsp";
-              owner.name = "mrbandler";
-              plugins = [
-                {
-                  name = "devenv-lsp";
-                  source = "./";
-                }
-              ];
-            }
-          ))
-        ];
-      };
     in
     {
-      programs.claude-code.settings = {
-        extraKnownMarketplaces.devenv-lsp.source = {
-          source = "directory";
-          path = "${marketplace}";
-        };
+      programs.claude-code.plugins.devenv-lsp = plugin;
 
-        enabledPlugins = {
-          "devenv-lsp@devenv-lsp" = true;
-        }
-        # the official plugins look the servers up on PATH and would claim
-        # the same extensions
-        // lib.mapAttrs' (_: s: lib.nameValuePair "${s.replaces}@claude-plugins-official" false) (
-          lib.filterAttrs (_: s: s ? replaces) servers
-        );
-      };
+      # the official plugins look the servers up on PATH and would claim
+      # the same extensions
+      programs.claude-code.settings.enabledPlugins = lib.mapAttrs' (
+        _: s: lib.nameValuePair "${s.replaces}@claude-plugins-official" false
+      ) (lib.filterAttrs (_: s: s ? replaces) servers);
     };
 }

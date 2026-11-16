@@ -123,7 +123,7 @@
         '';
       };
 
-      plugin = pkgs.writeTextDir ".claude-plugin/plugin.json" (
+      manifest = pkgs.writeTextDir ".claude-plugin/plugin.json" (
         builtins.toJSON {
           name = "mrbandler";
           version = "0.1.0";
@@ -172,23 +172,11 @@
           };
         }
       );
-      marketplace = pkgs.symlinkJoin {
-        name = "mrbandler-marketplace";
+      plugin = pkgs.symlinkJoin {
+        name = "mrbandler-plugin";
         paths = [
-          plugin
+          manifest
           ./_mrbandler # skills/
-          (pkgs.writeTextDir ".claude-plugin/marketplace.json" (
-            builtins.toJSON {
-              name = "mrbandler";
-              owner.name = "mrbandler";
-              plugins = [
-                {
-                  name = "mrbandler";
-                  source = "./";
-                }
-              ];
-            }
-          ))
         ];
       };
     in
@@ -196,13 +184,6 @@
       # docs-lookup skill; anonymous lookups, replaces the context7 MCP plugin
       home.packages = [ pkgs.ctx7 ];
 
-      programs.claude-code.settings = {
-        extraKnownMarketplaces.mrbandler.source = {
-          source = "directory";
-          path = "${marketplace}";
-        };
-
-        enabledPlugins."mrbandler@mrbandler" = true;
-      };
+      programs.claude-code.plugins.mrbandler = plugin;
     };
 }
