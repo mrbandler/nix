@@ -21,10 +21,6 @@
       system.activationScripts.power.text = ''
         pmset -c sleep 0 displaysleep 30
       '';
-
-      # pmset cannot keep the Mac awake with the lid closed; Amphetamine can,
-      # with a trigger that is active only while the power adapter is connected
-      homebrew.masApps.Amphetamine = 937984704;
     };
 
     provides.to-users =
